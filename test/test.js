@@ -1,7 +1,7 @@
 const assert = require('assert');
 const puppeteer = require('puppeteer');
 const should = require('chai').should();
-//let {testData, testDataRu, testDataClpbrd, testDataClpbrd2, expectCells, expectCellsRu}  = require('./testData');
+let {testData}  = require('./testData');
 
 describe('test  function', function() {
 
@@ -45,46 +45,43 @@ describe('test  function', function() {
     it('test dbSqlite.getDocs function search cadn from SQLITE', async function() {
         var dbSqlite = require('../lib/dbSqlite');
 
-        var res = await dbSqlite.getDocs('75:32:040508:2559','db1/testData.db')
+        let db = await dbSqlite.setDBtestData(testData)
             .catch(err => {
+                console.log(err);
                 return ({error:err.message})
             });
-        res.error.should.to.be.equal('Cannot open database because the directory does not exist');
 
-        res = await dbSqlite.getDocs('75:32:040508:2559','db/testData1.db')
-            .catch(err => {
-                return ({error:err.message})
-            });
-        res.error.should.to.be.equal('no such table: SCAN_DOCUMENTS');
+        db.name.should.equal(":memory:");
+        db.open.should.equal(true);
 
-        res = await dbSqlite.getDocs('75:32:040508:25591','db/testData.db'); //return empty object
+        res = await dbSqlite.getDocs('7504-361',db); //return empty object
         assert.deepStrictEqual(res.error,undefined);
         assert.deepStrictEqual(res,[]);
 
-        res = await dbSqlite.getDocs('75:32:040508:2559','db/testData.db'); //return some array object
+        res = await dbSqlite.getDocs('7504-36',db); //return some array object
         assert.deepStrictEqual(res.error,undefined);
-        res.length.should.to.be.equal(43);
+        res.length.should.to.be.equal(4);
     })
 
     it('test dbSqlite.createDocsTree function ', async function() {
         var dbSqlite = require('../lib/dbSqlite');
 
-        var testData = [{"id":1,"pr":"","inv_nomer":"","cad_number":"75/040508-2559","cond_number":"","adr_txt":"мкр 5-й, 26, кв. 29","name_doc":"","full_name_doc":"Опись дела","ver":1,"file_img":"a.pdf","create_user":"somebody","created_at":"30.07.2020 16:40:01","updated_at":"","add_info":"","VOL_NMB":"1","ORDR":0},
-            {"id":2,"pr":"","inv_nomer":"","cad_number":"75/040508-2559","cond_number":"7500-135/1/А/16","adr_txt":"мкр 15-й, 26, кв. 29","name_doc":"документ от 05.03.2003","full_name_doc":"документ 1 от 05.03.2003","ver":2,"file_img":"документ_от_05.03.2003.1.pdf","create_user":"somebody","created_at":"30.07.2020 16:39:52","updated_at":"","add_info":"","VOL_NMB":"1","ORDR":1},
-            {"id":3,"pr":"","inv_nomer":"","cad_number":"75/040508-2559","cond_number":"","adr_txt":"мкр 5-й, 26, кв. 29","name_doc":"","full_name_doc":"Опись дела","ver":1,"file_img":"b.pdf","create_user":"somebody","created_at":"30.07.2020 16:40:01","updated_at":"","add_info":"","VOL_NMB":"2","ORDR":0},
-            {"id":4,"pr":"","inv_nomer":"","cad_number":"75/040508-2559","cond_number":"7500-135/1/А/16","adr_txt":"мкр 15-й, 26, кв. 29","name_doc":"документ от 05.03.2003","full_name_doc":"документ 2 от 05.03.2003","ver":2,"file_img":"документ_от_05.03.2003.2.pdf","create_user":"somebody","created_at":"30.07.2020 16:39:52","updated_at":"","add_info":"","VOL_NMB":"2","ORDR":1}]
-        var tree = await dbSqlite.createDocsTree(testData);
+        var tree = await dbSqlite.createDocsTree(testData.data);
         var allItem = [];
         tree._traverse((node) => {
             allItem.push({[node.id]:node.text, fileImg: node.fileImg});
         });
-        assert.deepStrictEqual(allItem,[{"cadn": "75/040508-2559", "fileImg": undefined}, //TODO
+        console.log(tree._root.nodes);
+        assert.deepStrictEqual(allItem,[
+            {"arrayDocsTree": undefined, "fileImg": undefined},
+            {"cadn04-25": "04-25", "fileImg": undefined}, //TODO
             {"tom1": "Том 1", "fileImg": undefined},
-            {"doc_1_0": "Опись дела", "fileImg": "a.pdf"},
-            {"doc_1_1": "документ 1 от 05.03.2003","fileImg": "документ_от_05.03.2003.1.pdf"},
+            {"doc_1_0": "volume inventory", "fileImg": "inventory.pdf"},
+            {"doc_1_1": "certificate_1_at_05-03-2003","fileImg": "certificate_1_at_05-03-2003.1.pdf"},
             {"tom2":"Том 2", "fileImg": undefined},
-            {"doc_2_0": "Опись дела",  "fileImg": "b.pdf"},
-            {"doc_2_1": "документ 2 от 05.03.2003", "fileImg": "документ_от_05.03.2003.2.pdf"}
+            {"doc_2_0": "volume inventory", "fileImg": "inventory.pdf"},
+            {"doc_2_1": "certificate_2_at_11-01-2006", "fileImg": "certificate_2_at_11-01-2006.5.pdf"},
+
         ]);
     })
 

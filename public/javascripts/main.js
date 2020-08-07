@@ -1,4 +1,4 @@
-var config = {
+let config = {
     layout: {
         name: 'layout',
         padding: 0,
@@ -22,7 +22,7 @@ var config = {
                     items: [
                         { type: 'html',  id: 'item5',
                             html: function (item) {
-                                var html =
+                                let html =
                                     '<div style="padding: 3px 10px;">'+
                                     ' Кад.№:'+
                                     '    <input id="fldSearch" size="20" placeholder="Enter Cadn" onchange="searchCadn(this.value)" '+
@@ -64,7 +64,7 @@ var config = {
         onDblClick: function (event) {
             console.log(event.target);
             console.log(event.object.tag);
-            var tabs = w2ui.layout_main_tabs;
+            const tabs = w2ui.layout_main_tabs;
             if (tabs.get(event.target)) {
                 tabs.select(event.target);
                 w2ui.layout.html('main', 'Tab Selected');
@@ -78,7 +78,7 @@ var config = {
 };
 
 function searchCadn(cadn) {
-    var el = w2ui.layout_left_toolbar.set('item5', { value: cadn });
+    w2ui.layout_left_toolbar.set('item5', { value: cadn });
     w2ui.sidebar.lock('', true);
     $.ajax({
         type: "POST",
@@ -90,7 +90,7 @@ function searchCadn(cadn) {
                 w2alert(cadn + ' - ' + data.error);
                 w2ui.sidebar.unlock();
             } else {
-                w2ui['sidebar'].add(data._root);
+                w2ui['sidebar'].add(data._root.nodes);
                 w2ui.sidebar.unlock();
             }
         },

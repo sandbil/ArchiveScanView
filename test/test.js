@@ -1,7 +1,7 @@
 const assert = require('assert');
 const puppeteer = require('puppeteer');
 const should = require('chai').should();
-let {testData,testTreeClass}  = require('./testData');
+let {testData,testTreeClass, treeTest}  = require('./testData');
 
 function setDBtestData(testData, dbMem) {
     return new Promise(function(resolve, reject ) {
@@ -40,7 +40,7 @@ describe('test  function', function() {
             let tomId  = ['tom', el.vol_nmb, cadnId].join('_');
             let docId  = ['doc', el.vol_nmb,el.ordr, tomId].join('_');
             tree._addNode(cadnId, el.cad_number,'icon-folder','arrayDocsTree', 'objData');
-            tree._addNode(tomId, 'Том ' + el.vol_nmb,'icon-folder', cadnId);
+            tree._addNode(tomId, 'Vol ' + el.vol_nmb,'icon-folder', cadnId);
             tree._addNode(docId, el.full_name_doc, 'icon-page', tomId, 'docData', el.file_img);
         });
         let allItem = [];
@@ -129,22 +129,22 @@ describe('test  function', function() {
         assert.deepStrictEqual(allItem,[
             {"arrayDocsTree": undefined, "fileImg": undefined},
               {"cn_04-25": "04-25", "fileImg": undefined},
-                {"tom_1_cn_04-25": "Том 1", "fileImg": undefined},
+                {"tom_1_cn_04-25": "Vol 1", "fileImg": undefined},
                   {"doc_1_0_tom_1_cn_04-25": "volume 1 inventory04-25", "fileImg": "inventory.pdf"},
                   {"doc_1_1_tom_1_cn_04-25": "certificate_1_04-25","fileImg": "certificate_1_at_05-03-2003.1.pdf"},
-                {"tom_2_cn_04-25": "Том 2", "fileImg": undefined},
-                  {"doc_2_0_tom_2_cn_04-25": "volume 2 inventory04-25","fileImg": "inventory.pdf"},
+                {"tom_2_cn_04-25": "Vol 2", "fileImg": undefined},
+                  {"doc_2_0_tom_2_cn_04-25": "volume 2 inventory04-25","fileImg": "inventory2.pdf"},
                   {"doc_2_1_tom_2_cn_04-25": "certificate_2_04-25","fileImg": "certificate_2_at_11-01-2006.5.pdf"},
               {"cn_105-34": "105-34", "fileImg": undefined},
-                {"tom_1_cn_105-34": "Том 1","fileImg": undefined},
+                {"tom_1_cn_105-34": "Vol 1","fileImg": undefined},
                   {"doc_1_0_tom_1_cn_105-34": "volume inventory105-34","fileImg": "inventory3.pdf"},
                   {"doc_1_1_tom_1_cn_105-34": "reference_at_105-34","fileImg": "reference_at_10-10-1998.1.pdf"},
               {"cn_7504-36": "7504-36","fileImg": undefined,},
-                {"tom__cn_7504-36": "Том ","fileImg": undefined},
-                  {"doc__0_tom__cn_7504-36": "volume inventory7504-36","fileImg": "inventory.pdf"},
+                {"tom__cn_7504-36": "Vol ","fileImg": undefined},
+                  {"doc__0_tom__cn_7504-36": "volume inventory7504-36","fileImg": "inventory4.pdf"},
                   {"doc__1_tom__cn_7504-36": "certificate_1_7504-36","fileImg": "certificate_1_at_05-03-2003.1.pdf"},
-                {"tom_1_cn_7504-36": "Том 1", "fileImg": undefined},
-                  {"doc_1_0_tom_1_cn_7504-36": "volume 1 inventory7504-36","fileImg": "inventory.pdf"},
+                {"tom_1_cn_7504-36": "Vol 1", "fileImg": undefined},
+                  {"doc_1_0_tom_1_cn_7504-36": "volume 1 inventory7504-36","fileImg": "inventory5.pdf"},
                   {"doc_1_1_tom_1_cn_7504-36": "certificate_2_7504-36", "fileImg": "certificate_2_at_11-01-2006.5.pdf"}
         ]);
     });
@@ -249,17 +249,36 @@ describe('test  Interface', function() {
         it('test get get docsTree', async function() {
             this.timeout(10000);
             let result = await responseParse('http://localhost:3000/docstree?cadn=04-25');
-            console.log(result)
+            console.log(result);
+            assert.deepStrictEqual(JSON.parse(result),treeTest);
         });
         it('test search cadn', async function() {
             this.timeout(10000);
             await page.click('#fldSearch');
-            await page.type('#fldSearch','75:32:040508:2559');
-            //await page.keyboard.press('Enter');
-            await page.waitFor(500);
-            //let tabeditCells = await page.evaluate(() => { return SocialCalc.GetSpreadsheetControlObject().editor.context.sheetobj.cells});
-            //tabeditCells.A3.coord.should.to.be.equal('A3')
+            await page.type('#fldSearch','04-25');
+            await page.keyboard.press('Enter');
+            await page.waitForSelector("#node_cn_04-25");
+            let nodeId = await page.evaluate(() => {
+                return [
+                $("#node_cn_04-25 div.w2ui-node-caption").text(),
+                  $("#node_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_1_0_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_1_1_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                  $("#node_tom_2_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_2_0_tom_2_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
+            ];
+            });
 
+            assert.deepStrictEqual(nodeId,[
+                "04-25",
+                  "Vol 1",
+                    "volume 1 inventory04-25",
+                    "certificate_1_04-25",
+                  "Vol 2",
+                    "volume 2 inventory04-25",
+                    "certificate_2_04-25"
+            ])
         });
 
 

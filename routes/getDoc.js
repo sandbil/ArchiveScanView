@@ -3,7 +3,7 @@ var router = express.Router();
 
 /* GET tree of documents . */
 router.get('/', function(req, res, next) {
-    res.send('respond with a resource');
+    res.render('pdfView', { title: 'Просмотр элетронного архива' });
 });
 
 module.exports = router;

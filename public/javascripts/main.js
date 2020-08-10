@@ -45,7 +45,9 @@ let config = {
                     active: 'tab0',
                     tabs: [{ id: 'tab0', text: 'Initial Tab' }],
                     onClick: function (event) {
-                        w2ui.layout.html('main', 'Active tab: '+ event.target);
+                       // w2ui.layout.html('main', 'Active tab: '+ event.target);
+                        $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
+                        $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
                     },
                     onClose: function (event) {
                         this.click('tab0');
@@ -66,11 +68,16 @@ let config = {
             console.log(event.object.tag);
             const tabs = w2ui.layout_main_tabs;
             if (tabs.get(event.target)) {
+                //tabs.select(event.target);
+                //w2ui.layout.html('main', 'Tab Selected');
+                $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
                 tabs.select(event.target);
-                w2ui.layout.html('main', 'Tab Selected');
+                $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
             } else {
-                tabs.add({ id: event.target, text: 'Tab '+ event.target, closable: true });
-                w2ui.layout.html('main', 'New tab added' + event.target);
+                $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
+                tabs.add({ id: event.target, text: event.object.text, closable: true });
+                $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>')
+               // w2ui.layout.html('main', 'New tab added' + event.object.objData.fullName);
                 tabs.select(event.target);
             }
         }

@@ -1,3 +1,17 @@
+let options = {
+    pdfOpenParams: {
+        navpanes: 0,
+        toolbar: 0,
+        statusbar: 0,
+        view: "FitH",
+        //view: "FitV",
+        pagemode: "thumbs",
+        //page: 2
+    },
+    //forcePDFJS: true,
+    PDFJS_URL: "/pdfjs/web/viewer.html"
+};
+
 let config = {
     layout: {
         name: 'layout',
@@ -48,6 +62,7 @@ let config = {
                        // w2ui.layout.html('main', 'Active tab: '+ event.target);
                         $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
                         $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
+                        w2ui.sidebar.select(event.target);
                     },
                     onClose: function (event) {
                         this.click('tab0');
@@ -74,15 +89,19 @@ let config = {
                 tabs.select(event.target);
                 $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
             } else {
-                $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
-                tabs.add({ id: event.target, text: event.object.text, closable: true });
-                $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>')
-               // w2ui.layout.html('main', 'New tab added' + event.object.objData.fullName);
-                tabs.select(event.target);
+                if (event.target.slice(0,3) == 'doc'){
+                    $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
+                    tabs.add({ id: event.target, text: event.object.text, closable: true });
+                    $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>');
+                    // w2ui.layout.html('main', 'New tab added' + event.object.objData.fullName);
+                    tabs.select(event.target);
+                    PDFObject.embed("/getdoc?filepdf=" + event.object.fileImg, "#"+event.target, options);
+                }
             }
         }
     }
 };
+
 
 function searchCadn(cadn) {
     w2ui.layout_left_toolbar.set('item5', { value: cadn });

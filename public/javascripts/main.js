@@ -66,6 +66,7 @@ let config = {
                     },
                     onClose: function (event) {
                         this.click('tab0');
+                        $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).remove();
                     }
                 }
             },

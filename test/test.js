@@ -1,6 +1,6 @@
-const assert = require('assert');
+//const assert = require('assert');
 const puppeteer = require('puppeteer');
-const should = require('chai').should();
+const expect = require('chai').expect;
 let {testData,testTreeClass, treeTest}  = require('./testData');
 
 function setDBtestData(testData, dbMem) {
@@ -47,9 +47,9 @@ describe('test  function', function() {
         tree._traverse((node) => {
             allItem.push(node.id);
         });
-        assert.deepStrictEqual(tree._root.nodes,testTreeClass);
+        expect(tree._root.nodes,).to.deep.equal(testTreeClass);
 
-        assert.deepStrictEqual(tree._displayLeafs('tom_1_cn_04-25'),[
+        expect(tree._displayLeafs('tom_1_cn_04-25')).to.deep.equal([
             {"id": "doc_1_0_tom_1_cn_04-25",
              "text": "volume 1 inventory04-25",
              "img": "icon-page",
@@ -65,7 +65,7 @@ describe('test  function', function() {
              "nodes": []
             }
         ]);
-        assert.deepStrictEqual(tree._search('doc__1_tom__cn_7504-36'),
+        expect(tree._search('doc__1_tom__cn_7504-36')).to.deep.equal(
             {"id": "doc__1_tom__cn_7504-36",
              "text": "certificate_1_7504-36",
              "img": "icon-page",
@@ -75,12 +75,12 @@ describe('test  function', function() {
         });
 
         tree._removeNode('cn_105-34');
-        tree._search("cn_105-34").should.equal("Not Found");
+        expect(tree._search("cn_105-34")).to.equal("Not Found");
         allItem = [];
         tree._traverse((node) => {
             allItem.push(node.id);
         });
-        assert.deepStrictEqual(allItem,[
+        expect(allItem).to.deep.equal([
             "arrayDocsTree",
               "cn_04-25",
                 "tom_1_cn_04-25",
@@ -107,16 +107,30 @@ describe('test  function', function() {
                 console.log(err);
                 return ({error:err.message})
             });
-        db.name.should.equal(":memory:");
-        db.open.should.equal(true);
+        expect(db.name).to.equal(":memory:");
+        expect(db.open).to.equal(true);
 
         res = await dbSqlite.getDocs('7504361',db); //return empty object
-        assert.deepStrictEqual(res.error,undefined);
-        assert.deepStrictEqual(res,[]);
+        expect(res.error).to.deep.equal(undefined);
+        expect(res).to.deep.equal([]);
 
         res = await dbSqlite.getDocs('105-34',db); //return some array object
-        assert.deepStrictEqual(res.error,undefined);
-        assert.deepStrictEqual(res, [testData.data[4],testData.data[5]]);
+        expect(res.error).to.deep.equal(undefined);
+        expect(res).to.deep.equal( [testData.data[4],testData.data[5]]);
+        expect(res[0]).to.have.property('cad_number');
+        expect(res[0]).to.have.property('inv_nomer');
+        expect(res[0]).to.have.property('adr_txt');
+        expect(res[0]).to.have.property('full_name_doc');
+        expect(res[0]).to.have.property('name_doc');
+        expect(res[0]).to.have.property('create_user');
+        expect(res[0]).to.have.property('created_at');
+        expect(res[0]).to.have.property('updated_at');
+        expect(res[0]).to.have.property('add_info');
+        expect(res[0]).to.have.property('file_img');
+        expect(res[0]).to.have.property('vol_nmb');
+        expect(res[0]).to.have.property('ordr');
+
+
     });
 
     it('test dbSqlite.createDocsTree function ', async function() {
@@ -126,7 +140,7 @@ describe('test  function', function() {
         tree._traverse((node) => {
             allItem.push({[node.id]:node.text, fileImg: node.fileImg});
         });
-        assert.deepStrictEqual(allItem,[
+        expect(allItem).to.deep.equal([
             {"arrayDocsTree": undefined, "fileImg": undefined},
               {"cn_04-25": "04-25", "fileImg": undefined},
                 {"tom_1_cn_04-25": "Vol 1", "fileImg": undefined},
@@ -157,14 +171,14 @@ describe('test  function', function() {
                 return ({error:err.message})
             });
         let resEmpty = await dbSqlite.getDocsTree('09300',db);
-        resEmpty.error.should.to.be.equal('the object not founded');
+        expect(resEmpty.error).to.equal('the object not founded');
 
         let res = await dbSqlite.getDocsTree('105-34',db);
-        assert.deepStrictEqual(res.error, undefined);
+        expect(res.error).to.deep.equal( undefined);
         res._traverse((node) => {
             console.log(node.id,node.text);
         });
-        assert.deepStrictEqual(res._search('doc_1_0_tom_1_cn_105-34'),
+        expect(res._search('doc_1_0_tom_1_cn_105-34')).to.deep.equal(
             {
              "id": "doc_1_0_tom_1_cn_105-34",
              "text": "volume inventory105-34",
@@ -241,7 +255,7 @@ describe('test  Interface', function() {
                             reject(err);
                             return;
                         }
-                        resolve(body);
+                        resolve(response);
                     });
             });
         }
@@ -249,9 +263,35 @@ describe('test  Interface', function() {
         it('test get get docsTree', async function() {
             this.timeout(10000);
             let result = await responseParse('http://localhost:3000/docstree?cadn=04-25');
-            console.log(result);
-            assert.deepStrictEqual(JSON.parse(result),treeTest);
+            expect(result).to.have.property('statusCode', 200);
+            expect(result).to.have.property('headers');
+            expect(result.headers).to.have.property('content-type', 'application/json; charset=utf-8');
+            expect(JSON.parse(result.body)).to.deep.equal(treeTest);
+
+            result = await responseParse('http://localhost:3000/docstree?cadn=04-251');
+            expect(result).to.have.property('statusCode', 200);
+            expect(result).to.have.property('headers');
+            expect(result.headers).to.have.property('content-type', 'application/json; charset=utf-8');
+            expect(JSON.parse(result.body)).to.deep.equal({"_root": null, "error": "the object not founded"});
         });
+
+        it('test get get docs file', async function() {
+            this.timeout(10000);
+            let result = await responseParse('http://localhost:3000/getdoc?filepdf=inventory.pdf');
+            //console.log(result);
+            expect(result).to.have.property('statusCode', 200);
+            expect(result).to.have.property('headers');
+            expect(result.headers).to.have.property('content-type', 'application/pdf');
+            expect(result.headers).to.have.property('content-length', '42361');
+
+            result = await responseParse('http://localhost:3000/getdoc?filepdf=sample1.pdf');
+            //console.log(result);
+            expect(result).to.have.property('statusCode', 200);
+            expect(result).to.have.property('headers');
+            expect(result.headers).to.have.property('content-type', 'text/html; charset=utf-8');
+            expect(result.body).to.equal("error");
+        });
+
         it('test search cadn', async function() {
             this.timeout(10000);
             await page.click('#fldSearch');
@@ -269,18 +309,54 @@ describe('test  Interface', function() {
                     $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
             ];
             });
-
-            assert.deepStrictEqual(nodeId,[
+            expect(nodeId).to.deep.equal([
                 "04-25",
-                  "Vol 1",
-                    "volume 1 inventory04-25",
-                    "certificate_1_04-25",
-                  "Vol 2",
-                    "volume 2 inventory04-25",
-                    "certificate_2_04-25"
-            ])
+                "Vol 1",
+                "volume 1 inventory04-25",
+                "certificate_1_04-25",
+                "Vol 2",
+                "volume 2 inventory04-25",
+                "certificate_2_04-25"
+            ]);
         });
 
+        it('test click doc in docstree', async function() {
+            this.timeout(10000);
+            this.timeout(10000);
+            await page.click('#fldSearch',{clickCount: 3});
+            await page.type('#fldSearch','04-25');
+            await page.keyboard.press('Enter');
+            await page.waitForSelector("#node_cn_04-25");
+
+            let divForEmbedDoc = await page.evaluate(() => {
+                return  $("#doc_1_0_tom_1_cn_04-25").length
+            });
+            expect(divForEmbedDoc).to.equal(0);
+            await Promise.all([
+                page.waitForSelector('#doc_1_0_tom_1_cn_04-25'),
+                page.click('#node_doc_1_0_tom_1_cn_04-25', {clickCount:2}),
+            ]);
+            divForEmbedDoc = await page.evaluate(() => {
+                return  $("#doc_1_0_tom_1_cn_04-25").length
+            });
+            expect(divForEmbedDoc).to.equal(1);
+            divContent = await page.evaluate(() => {
+                return  [$("#doc_1_0_tom_1_cn_04-25").children().prop('nodeName'),
+                    $("#doc_1_0_tom_1_cn_04-25").children().attr('class'),
+                    $("#doc_1_0_tom_1_cn_04-25").children().attr('src'),
+                    $("#doc_1_0_tom_1_cn_04-25").children().attr('style')]
+            });
+            expect(divContent).to.deep.equal(["EMBED", "pdfobject",
+                "/getdoc?filepdf=inventory.pdf#navpanes=0&toolbar=0&statusbar=0&view=FitH&pagemode=thumbs",
+                "overflow: auto; width: 100%; height: 100%;"]);
+
+            await page.click('.w2ui-tab-close');
+            page.waitFor(100);
+            divForEmbedDoc = await page.evaluate(() => {
+                return  $("#doc_1_0_tom_1_cn_04-25").length
+            });
+            expect(divForEmbedDoc).to.equal(0);
+        });
 
     });
 

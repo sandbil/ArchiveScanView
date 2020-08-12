@@ -1,20 +1,39 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const path = require('path');
+const router = express.Router();
 
 /* GET tree of documents . */
 router.get('/', function(req, res, next) {
     //console.log(req);
+    let rootDirForScanDocs ='';
+    if (req.app.get('env') === 'development') {
+        rootDirForScanDocs = path.join(__dirname, '../files')
+    } else {
+        rootDirForScanDocs = ''
+    } ;
+
+
     let file = req.query.filepdf
-        , path = 'd:/!work/nodeJs/ArchiveScanView/files/' + decodeURIComponent(file);
+        , filePDF = path.join(rootDirForScanDocs, decodeURIComponent(file));
     let options = {
-        root: __dirname,
+        //root:  rootDirForScanDocs,
         dotfiles: 'deny',
         headers: {
             'x-timestamp': Date.now(),
             'x-sent': true
         }
     }
-    res.sendFile(path);
+    //console.log(__dirname);
+    //console.log(rootDirForScanDocs);
+    res.sendFile(filePDF, options ,function (err) {
+        if (err) {
+            //next(err)
+            res.send('error')
+        } else {
+            //console.log('Sent:', fileName)
+            //todo loging who viewed doc
+        }
+    })
 
 });
 

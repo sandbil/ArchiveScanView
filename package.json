@@ -10,9 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "better-sqlite3": "^7.1.0",
+    "connect-better-sqlite3": "git+https://github.com/esdras/connect-better-sqlite3.git",
     "cookie-parser": "^1.4.5",
     "debug": "^4.1.1",
     "express": "^4.17.1",
+    "express-session": "^1.17.1",
     "http-errors": "^1.8.0",
     "morgan": "^1.10.0",
     "pug": "^3.0.0"

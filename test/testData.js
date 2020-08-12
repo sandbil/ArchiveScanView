@@ -71,10 +71,12 @@ exports.treeTest = {
             "text": "04-25",
             "img": "icon-folder",
             "objData": {"cadn": "04-25", "invn": "321", "adr": "34 New Road London W34 8TN"},
+            "expanded": true,
             "nodes": [{
                 "id": "tom_1_cn_04-25",
                 "text": "Vol 1",
                 "img": "icon-folder",
+                "expanded": true,
                 "nodes": [{
                     "id": "doc_1_0_tom_1_cn_04-25",
                     "text": "volume 1 inventory04-25",
@@ -106,6 +108,7 @@ exports.treeTest = {
                 "id": "tom_2_cn_04-25",
                 "text": "Vol 2",
                 "img": "icon-folder",
+                "expanded": true,
                 "nodes": [{
                     "id": "doc_2_0_tom_2_cn_04-25",
                     "text": "volume 2 inventory04-25",

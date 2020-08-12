@@ -20,7 +20,7 @@ app.set('view engine', 'pug');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+//app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 const store = new SQLiteStore({
@@ -28,7 +28,20 @@ const store = new SQLiteStore({
   secure: true
 });
 
-app.use(store);
+//app.use(store);
+
+/*app.use(
+    session({
+        store: store(),
+        secret: 'keyboard cat',
+        resave: false,
+    })
+);*/
+app.use(session({
+    store: store,
+    secret: 'your secret',
+    cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
+}));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

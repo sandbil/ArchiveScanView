@@ -10,8 +10,7 @@ function setDBtestData(testData, dbMem) {
             db = require('better-sqlite3')(':memory:');
         } else {
             db = require('better-sqlite3')('db/testData.db');
-        };
-
+        }
         let stmt1 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt1.run();
         let stmt2 = db.prepare(testData.createTable);

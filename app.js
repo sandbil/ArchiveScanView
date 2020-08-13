@@ -1,17 +1,18 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-const session = require('express-session')
-const SQLiteStore = require('connect-better-sqlite3')(session)
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const parseurl = require('parseurl');
+const logger = require('morgan');
+const session = require('express-session');
+const SQLiteStore = require('connect-better-sqlite3')(session);
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var docsTreeRouter = require('./routes/docsTree');
-var getDocRouter = require('./routes/getDoc');
+const indexRouter = require('./routes/index');
+const usersRouter = require('./routes/users');
+const docsTreeRouter = require('./routes/docsTree');
+const getDocRouter = require('./routes/getDoc');
 
-var app = express();
+const app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -24,8 +25,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const store = new SQLiteStore({
-  secret: 'foo bar',
-  secure: true
+  //secret: 'foo bar',
+  //secure: true
 });
 
 //app.use(store);
@@ -42,6 +43,20 @@ app.use(session({
     secret: 'your secret',
     cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
 }));
+
+app.use(function (req, res, next) {
+    if (!req.session.views) {
+        req.session.views = {}
+    }
+
+    // get the url pathname
+    const pathname = parseurl(req).pathname;
+
+    // count the views
+    req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
+
+    next()
+});
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

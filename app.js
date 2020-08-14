@@ -4,8 +4,10 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const parseurl = require('parseurl');
 const logger = require('morgan');
+const cfg = require('./config')
 const session = require('express-session');
 const SQLiteStore = require('connect-better-sqlite3')(session);
+
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
@@ -24,20 +26,8 @@ app.use(express.urlencoded({ extended: false }));
 //app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const store = new SQLiteStore({
-  //secret: 'foo bar',
-  //secure: true
-});
+const store = new SQLiteStore(cfg.sqlite3db);
 
-//app.use(store);
-
-/*app.use(
-    session({
-        store: store(),
-        secret: 'keyboard cat',
-        resave: false,
-    })
-);*/
 app.use(session({
     store: store,
     secret: 'your secret',
@@ -48,13 +38,8 @@ app.use(function (req, res, next) {
     if (!req.session.views) {
         req.session.views = {}
     }
-
-    // get the url pathname
     const pathname = parseurl(req).pathname;
-
-    // count the views
     req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
-
     next()
 });
 

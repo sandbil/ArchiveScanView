@@ -131,6 +131,6 @@ function searchCadn(cadn) {
 $(function () {
     // initialization
     $('#main').w2layout(config.layout);
-    //w2ui.layout.content('top',$('#toolbar').w2toolbar(config.topToolBar));
+    //w2ui.layout.content('top',$('#toolbar').w2toolbar(config.js.topToolBar));
     w2ui.layout.html('left', $().w2sidebar(config.sidebar));
 });

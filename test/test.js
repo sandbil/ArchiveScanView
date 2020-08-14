@@ -1,15 +1,17 @@
 //const assert = require('assert');
+const cfg = require('../lib/config')
 const puppeteer = require('puppeteer');
 const expect = require('chai').expect;
 let {testData,testTreeClass, treeTest}  = require('./testData');
 
 function setDBtestData(testData, dbMem) {
+    console.log([cfg.sqlite3db.dir,'/',cfg.sqlite3db.filename].join());
     return new Promise(function(resolve, reject ) {
         let db;
         if (dbMem) {
             db = require('better-sqlite3')(':memory:');
         } else {
-            db = require('better-sqlite3')('db/testData.db');
+            db = require('better-sqlite3')([cfg.sqlite3db.dir,'/',cfg.sqlite3db.filename].join());
         }
         let stmt1 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt1.run();

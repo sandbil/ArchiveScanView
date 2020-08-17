@@ -1,20 +1,14 @@
 const express = require('express');
 const path = require('path');
 const router = express.Router();
+const cfg = require('../lib/config')
 
 /* GET tree of documents . */
 router.get('/', function(req, res, next) {
     //console.log(req);
-    let rootDirForScanDocs ='';
-    if (req.app.get('env') === 'development') {
-        rootDirForScanDocs = path.join(__dirname, '../files')
-    } else {
-        rootDirForScanDocs = ''
-    } ;
-
-
     let file = req.query.filepdf
-        , filePDF = path.join(rootDirForScanDocs, decodeURIComponent(file));
+        , filePDF = path.join(cfg.rootDirForScanDocs, decodeURIComponent(file));
+    console.log(filePDF);
     let options = {
         //root:  rootDirForScanDocs,
         dotfiles: 'deny',
@@ -28,6 +22,7 @@ router.get('/', function(req, res, next) {
     res.sendFile(filePDF, options ,function (err) {
         if (err) {
             //next(err)
+            console.log('error sendfile:', err.message)
             res.send('error')
         } else {
             //console.log('Sent:', fileName)

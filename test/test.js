@@ -5,13 +5,12 @@ const expect = require('chai').expect;
 let {testData,testTreeClass, treeTest}  = require('./testData');
 
 function setDBtestData(testData, dbMem) {
-    console.log([cfg.sqlite3db.dir,'/',cfg.sqlite3db.filename].join());
     return new Promise(function(resolve, reject ) {
         let db;
         if (dbMem) {
             db = require('better-sqlite3')(':memory:');
         } else {
-            db = require('better-sqlite3')([cfg.sqlite3db.dir,'/',cfg.sqlite3db.filename].join());
+            db = require('better-sqlite3')([cfg.sqlite3db.dir,'/',cfg.sqlite3db.filename].join(''));
         }
         let stmt1 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt1.run();
@@ -235,9 +234,6 @@ describe('test  Interface', function() {
     describe('test ', function() {
 
         beforeEach(async function () {
-            await page.evaluate(() => {
-               // let spreadsheet = null; //destroy previous spreadsheet
-            });
             await page.waitForSelector('#fldSearch');
         });
         function responseParse(url) {

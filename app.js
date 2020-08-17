@@ -4,7 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const parseurl = require('parseurl');
 const logger = require('morgan');
-const cfg = require('./config')
+const cfg = require('./lib/config')
 const session = require('express-session');
 const SQLiteStore = require('connect-better-sqlite3')(session);
 
@@ -30,16 +30,24 @@ const store = new SQLiteStore(cfg.sqlite3db);
 
 app.use(session({
     store: store,
-    secret: 'your secret',
+    resave: false,
+    saveUninitialized: false,
+    secret: cfg.session_secret,
     cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 } // 1 week
 }));
 
 app.use(function (req, res, next) {
-    if (!req.session.views) {
-        req.session.views = {}
+    if (!req.session.p_cadn) {
+        req.session.p_cadn = ''
     }
-    const pathname = parseurl(req).pathname;
-    req.session.views[pathname] = (req.session.views[pathname] || 0) + 1;
+    req.props = {};
+    if(req.query)  for (var attrname in req.query)  { req.props[attrname] = req.query[attrname]; }
+    if(req.params) for (var attrname in req.params) { req.props[attrname] = req.params[attrname]; }
+    if(req.body)   for (var attrname in req.body)   { req.props[attrname] = req.body[attrname]; }
+
+    req.session.p_cadn = req.props.cadn;
+    req.session.filepdf = req.props.filepdf;
+
     next()
 });
 

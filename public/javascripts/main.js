@@ -121,7 +121,7 @@ function searchCadn(cadn) {
                 w2ui.sidebar.unlock();
             }
         },
-        error: function(err){ w2alert('Ошибка: ' + cadn + ' status:' + err.status + ' ' + err.statusText)
+        error: function(err){ w2alert('Error: ' + cadn + ' - ' + err.responseText)
             .ok(function () { console.log(JSON.stringify(err)); }); w2ui.sidebar.unlock();}
     });
 
@@ -133,4 +133,5 @@ $(function () {
     $('#main').w2layout(config.layout);
     //w2ui.layout.content('top',$('#toolbar').w2toolbar(config.js.topToolBar));
     w2ui.layout.html('left', $().w2sidebar(config.sidebar));
+    searchCadn('');
 });

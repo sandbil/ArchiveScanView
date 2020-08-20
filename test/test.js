@@ -359,3 +359,63 @@ describe('test  Interface', function() {
 
 });
 
+describe('test call with initial parameter', function() {
+    let browser;
+    let page;
+    let page1;
+    let server;
+    let editAllToolBarArray;
+    // puppeteer options
+    const opts = {
+        headless: false,
+        defaultViewport: null,
+        args : ['--window-size=1350,800', '--lang=en-GB' ],
+        devtools: true,
+        //slowMo: 100,
+        timeout: 10000
+    };
+
+    before(async function() {
+        this.timeout(10000);
+        await setDBtestData(testData);
+        const app = require('../app');
+        //app.use(app.static('test'));
+        server = await app.listen(3000);
+
+        // Launch Puppeteer and navigate to the Express server
+        browser = await puppeteer.launch(opts);
+        page = await browser.newPage();
+        await page.goto('http://localhost:3000/?cadn=04-25');
+        await page.waitForSelector('#main');
+    });
+
+    after (async function(){
+        //await browser.close();
+        //await server.close();
+    });
+
+    it('test data', async function() {
+            this.timeout(10000);
+            let nodeId = await page.evaluate(() => {
+                return [
+                    $("#node_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_1_0_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_1_1_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_tom_2_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_2_0_tom_2_cn_04-25 div.w2ui-node-caption").text(),
+                    $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
+                ];
+            });
+            expect(nodeId).to.deep.equal([
+                "04-25",
+                "Vol 1",
+                "volume 1 inventory04-25",
+                "certificate_1_04-25",
+                "Vol 2",
+                "volume 2 inventory04-25",
+                "certificate_2_04-25"
+            ]);
+        });
+});
+

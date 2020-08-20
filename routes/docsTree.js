@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 //var oraInvNum = require('../lib/oraInvNum');
 var dbSqlite = require('../lib/dbSqlite');
+const winston = require('../lib/winstonCfg');
 
 
 /* GET tree of documents . */
@@ -12,7 +13,13 @@ router.all('/', function(req, res, next) {
     if(req.params) for (var attrname in req.params) { req.props[attrname] = req.params[attrname]; }
     if(req.body)   for (var attrname in req.body)   { req.props[attrname] = req.body[attrname]; }
 
-    var p_cadn = req.props.cadn;
+    let p_cadn = req.props.cadn;
+    if (!p_cadn) {
+        if (!req.session.p_cadn)
+            return res.json({_root: {nodes: []}})
+        else
+            p_cadn = req.session.p_cadn;
+    }
     console.log('req.props: ',req.props);
 
     dbSqlite.getDocsTree(p_cadn)
@@ -27,14 +34,12 @@ router.all('/', function(req, res, next) {
                     //return full page
                    return res.send(JSON.stringify(data));
                 }*/
-            },
-            function(err) {
-                console.log('Ошибка Запрос завершился неудачей ', err);
-                res.status(406).send(err);
             })
         .catch(function(err) {
-            console.error(err);
-            res.status(500).send(err);
+            //console.log('Ошибка Запрос завершился неудачей ', err);
+            winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+
+            res.status(500).send('Request failed');
         });
 });
 

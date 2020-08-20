@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 const cfg = require('../lib/config')
+const winston = require('../lib/winstonCfg');
 
 /* GET tree of documents . */
 router.get('/', function(req, res, next) {

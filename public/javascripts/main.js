@@ -135,5 +135,5 @@ $(function () {
     //w2ui.layout.content('top',$('#toolbar').w2toolbar(config.js.topToolBar));
     w2ui.layout.html('left', $().w2sidebar(config.sidebar));
 
-    searchCadn('');
+    searchCadn(w2ui.cadn);
 });

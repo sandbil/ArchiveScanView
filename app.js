@@ -2,7 +2,7 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 //const cookieParser = require('cookie-parser');
-const parseurl = require('parseurl');
+//const parseurl = require('parseurl');
 const morgan  = require('morgan');
 const cfg = require('./lib/config');
 const winston = require('./lib/winstonCfg');
@@ -39,7 +39,7 @@ app.use(session({
 }));
 
 app.use(function (req, res, next) {
-    if (!req.session.p_cadn) {
+    /*if (!req.session.p_cadn) {
         req.session.p_cadn = ''
     }
     req.props = {};
@@ -48,7 +48,7 @@ app.use(function (req, res, next) {
     if(req.body)   for (var attrname in req.body)   { req.props[attrname] = req.body[attrname]; }
 
     if (req.props.cadn) req.session.p_cadn = req.props.cadn;
-    req.session.filepdf = req.props.filepdf;
+    req.session.filepdf = req.props.filepdf;*/
 
     next()
 });
@@ -69,9 +69,7 @@ app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-// add this line to include winston logging
   winston.log('error',`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-  //{"message":"404 - NotFoundError: Not Found - /cadn - GET - ::1","level":"error"}
   // render the error page
   res.status(err.status || 500);
   res.render('error');

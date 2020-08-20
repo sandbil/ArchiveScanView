@@ -14,11 +14,8 @@ router.all('/', function(req, res, next) {
     if(req.body)   for (let attrname in req.body)   { req.props[attrname] = req.body[attrname]; }
 
     let p_cadn = req.props.cadn;
-    if (!p_cadn) { //todo
-        if (!req.session.p_cadn)
+    if (!p_cadn) {
             return res.json({_root: {nodes: []}});
-        else
-            p_cadn = req.session.p_cadn;
     }
     console.log('req.props: ',req.props);
 

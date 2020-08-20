@@ -34,21 +34,21 @@ let config = {
             { type: 'left', size: 400, resizable: true, minSize: 200,
                 toolbar: {
                     items: [
-                        { type: 'html',  id: 'item5',
+                        { type: 'html',  id: 'idFldSearch',
                             html: function (item) {
-                                let html =
-                                    '<div style="padding: 3px 10px;">'+
-                                    ' Кад.№:'+
-                                    '    <input id="fldSearch" size="20" placeholder="Enter Cadn" onchange="searchCadn(this.value)" '+
+                                return '<div style="padding: 3px 10px;"> '+
+                                    w2utils.lang('Cad. №:')+
+                                    '    <input id="fldSearch" size="20" placeholder="'+
+                                    w2utils.lang('Enter cad.number')+
+                                    '" onchange="searchCadn(this.value)" '+
                                     '         style="padding: 3px; border-radius: 2px; border: 1px solid silver" value="'+ (item.value || '') +'"/>'+
                                     '</div>';
-                                return html;
                             }
                         },
                         { type: 'break' },
-                        { type: 'button', id: 'item6', icon: 'fa-star-empty', text: 'Refresh',
-                            tooltip: 'Click to refresh entire toolbar.<br>Note, input value is preserved.',
-                            onClick: function (event) { this.refresh(); }
+                        { type: 'button', id: 'item6', icon: 'icon-reload', text: w2utils.lang('Refresh'),
+                            tooltip: 'Click to refresh the entire list of documents',
+                            onClick: function (event) { searchCadn(this.get('idFldSearch').value)}
                         }
                     ]
                 }
@@ -90,7 +90,7 @@ let config = {
                 tabs.select(event.target);
                 $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
             } else {
-                if (event.target.slice(0,3) == 'doc'){
+                if (event.target.slice(0,3) === 'doc'){
                     $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
                     tabs.add({ id: event.target, text: event.object.text, closable: true });
                     $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>');
@@ -105,23 +105,23 @@ let config = {
 
 
 function searchCadn(cadn) {
-    w2ui.layout_left_toolbar.set('item5', { value: cadn });
+    w2ui.layout_left_toolbar.set('idFldSearch', { value: cadn });
     w2ui.sidebar.lock('', true);
     $.ajax({
         type: "POST",
         url: 'docstree',
         data: {cadn:cadn},
         success: function(data){
-            console.log('callback ajax post');
             if (data.error) {
-                w2alert(cadn + ' - ' + data.error);
+                w2alert(cadn + ' - ' + w2utils.lang(data.error));
                 w2ui.sidebar.unlock();
             } else {
+                w2ui['sidebar'].nodes = [];
                 w2ui['sidebar'].add(data._root.nodes);
                 w2ui.sidebar.unlock();
             }
         },
-        error: function(err){ w2alert('Error: ' + cadn + ' - ' + err.responseText)
+        error: function(err){ w2alert(w2utils.lang('Error')+': ' + (cadn ? cadn : data.responseText) + ' - ' +  w2utils.lang('The request failed'))
             .ok(function () { console.log(JSON.stringify(err)); }); w2ui.sidebar.unlock();}
     });
 
@@ -130,8 +130,10 @@ function searchCadn(cadn) {
 
 $(function () {
     // initialization
+    w2utils.locale(navigator.language);
     $('#main').w2layout(config.layout);
     //w2ui.layout.content('top',$('#toolbar').w2toolbar(config.js.topToolBar));
     w2ui.layout.html('left', $().w2sidebar(config.sidebar));
+
     searchCadn('');
 });

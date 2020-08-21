@@ -7,6 +7,8 @@ const morgan  = require('morgan');
 const cfg = require('./lib/config');
 const winston = require('./lib/winstonCfg');
 const session = require('express-session');
+const {sso} = require('node-expose-sspi');
+
 const SQLiteStore = require('connect-better-sqlite3')(session);
 
 
@@ -52,7 +54,14 @@ app.use(function (req, res, next) {
 
     next()
 });
-
+app.use(sso.auth(),(req, res) =>  {
+    debug('sso');
+    if (!req.sso) {
+        req.session.user = ''
+    } else
+         req.session.user = req.sso.user;
+    //return res.redirect('/protected/welcome');
+});
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/docstree', docsTreeRouter);
@@ -67,9 +76,9 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
-  res.locals.message = err.message;
+  res.locals.message = 'Oops an error occurred!';
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-  winston.log('error',`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+  winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
   // render the error page
   res.status(err.status || 500);
   res.render('error');

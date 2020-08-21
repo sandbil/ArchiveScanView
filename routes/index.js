@@ -11,7 +11,7 @@ router.get('/', function(req, res, next) {
     let p_cadn = req.props.cadn;
     console.log('req.props: ',req.props);
 
-  res.render('index', { title: 'ArchiveScanView', cadn: p_cadn });
+  res.render('index', { title: 'ArchiveScanView', cadn: p_cadn, user: req.session.user });
 });
 
 module.exports = router;

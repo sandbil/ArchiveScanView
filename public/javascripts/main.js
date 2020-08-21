@@ -40,7 +40,7 @@ let config = {
                                     w2utils.lang('Cad. №:')+
                                     '    <input id="fldSearch" size="20" placeholder="'+
                                     w2utils.lang('Enter cad.number')+
-                                    '" onchange="searchCadn(this.value)" '+
+                                    '" onchange="changeCadn(this.value)" '+
                                     '         style="padding: 3px; border-radius: 2px; border: 1px solid silver" value="'+ (item.value || '') +'"/>'+
                                     '</div>';
                             }
@@ -103,6 +103,18 @@ let config = {
     }
 };
 
+function changeCadn(cadn) {
+    ind = 1;
+    let tb = w2ui.layout_main_tabs;
+    let tabs = tb.get();
+    tabs.splice(tabs.indexOf('tab0'), 1);
+    tabs.forEach(tab => {
+        $("#"+tab).remove()
+    });
+    tb.remove.apply(tb, tabs);
+
+    searchCadn(cadn);
+};
 
 function searchCadn(cadn) {
     w2ui.layout_left_toolbar.set('idFldSearch', { value: cadn });
@@ -121,7 +133,7 @@ function searchCadn(cadn) {
                 w2ui.sidebar.unlock();
             }
         },
-        error: function(err){ w2alert(w2utils.lang('Error')+': ' + (cadn ? cadn : data.responseText) + ' - ' +  w2utils.lang('The request failed'))
+        error: function(err){ w2alert(w2utils.lang('Error')+': ' + cadn + ' - ' +  w2utils.lang('The request failed'))
             .ok(function () { console.log(JSON.stringify(err)); }); w2ui.sidebar.unlock();}
     });
 

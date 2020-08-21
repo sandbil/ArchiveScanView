@@ -171,7 +171,7 @@ describe('test  function', function() {
                 return ({error:err.message})
             });
         let resEmpty = await dbSqlite.getDocsTree('09300',db);
-        expect(resEmpty.error).to.equal('the object not founded');
+        expect(resEmpty.error).to.equal('the object not found');
 
         let res = await dbSqlite.getDocsTree('105-34',db);
         expect(res.error).to.deep.equal( undefined);
@@ -246,10 +246,11 @@ describe('test  Interface', function() {
                             reject(error);
                             return;
                         } else if (response.statusCode !== 200) {
-                            let err = new Error('Response error');
-                            err.message = response.statusCode + ' ' + body;
-                            console.log('Couldn’t get page because of response error: ' + err);
-                            reject(err);
+                            //let err = new Error('Response error');
+                            //err.message = response.statusCode + ' ' + body;
+                            //console.log('Couldn’t get page because of response error: ' + err);
+                            //reject(err);
+                            resolve(response);
                             return;
                         }
                         resolve(response);
@@ -257,7 +258,7 @@ describe('test  Interface', function() {
             });
         }
 
-        it('test get get docsTree', async function() {
+        it('test get docsTree', async function() {
             this.timeout(10000);
             let result = await responseParse('http://localhost:3000/docstree?cadn=04-25');
             expect(result).to.have.property('statusCode', 200);
@@ -269,10 +270,10 @@ describe('test  Interface', function() {
             expect(result).to.have.property('statusCode', 200);
             expect(result).to.have.property('headers');
             expect(result.headers).to.have.property('content-type', 'application/json; charset=utf-8');
-            expect(JSON.parse(result.body)).to.deep.equal({"_root": null, "error": "the object not founded"});
+            expect(JSON.parse(result.body)).to.deep.equal({"_root": null, "error": "the object not found"});
         });
 
-        it('test get get docs file', async function() {
+        it('test get docs file', async function() {
             this.timeout(10000);
             let result = await responseParse('http://localhost:3000/getdoc?filepdf=inventory.pdf');
             //console.log(result);
@@ -283,10 +284,10 @@ describe('test  Interface', function() {
 
             result = await responseParse('http://localhost:3000/getdoc?filepdf=sample1.pdf');
             //console.log(result);
-            expect(result).to.have.property('statusCode', 200);
+            expect(result).to.have.property('statusCode', 404);
             expect(result).to.have.property('headers');
             expect(result.headers).to.have.property('content-type', 'text/html; charset=utf-8');
-            expect(result.body).to.equal("error");
+            expect(result.body.slice(0,32)).to.equal("<h1>Oops an error occurred!</h1>");
         });
 
         it('test search cadn', async function() {
@@ -317,8 +318,7 @@ describe('test  Interface', function() {
             ]);
         });
 
-        it('test click doc in docstree', async function() {
-            this.timeout(10000);
+        it('test click on a doc in the docs tree and close the tab', async function() {
             this.timeout(10000);
             await page.click('#fldSearch',{clickCount: 3});
             await page.type('#fldSearch','04-25');
@@ -353,6 +353,50 @@ describe('test  Interface', function() {
                 return  $("#doc_1_0_tom_1_cn_04-25").length
             });
             expect(divForEmbedDoc).to.equal(0);
+        });
+
+        it('check closing all open tabs from previous search after new search', async function() {
+            this.timeout(10000);
+            await page.click('#fldSearch',{clickCount: 3});
+            await page.type('#fldSearch','04-25');
+            await page.keyboard.press('Enter');
+            await page.waitForSelector("#node_cn_04-25");
+
+            await Promise.all([
+                page.waitForSelector('#doc_1_0_tom_1_cn_04-25'),
+                page.click('#node_doc_1_0_tom_1_cn_04-25', {clickCount:2}),
+                page.waitForSelector('#doc_1_1_tom_1_cn_04-25'),
+                page.click('#node_doc_1_1_tom_1_cn_04-25', {clickCount:2}),
+            ]);
+
+            let divForEmbedDoc = await page.evaluate(() => {
+                return  [{"#doc_1_0_tom_1_cn_04-25":$("#doc_1_0_tom_1_cn_04-25").length},
+                         {"#doc_1_1_tom_1_cn_04-25":$("#doc_1_1_tom_1_cn_04-25").length}]
+            });
+            expect(divForEmbedDoc).to.deep.equal([{"#doc_1_0_tom_1_cn_04-25": 1},
+                                                  {"#doc_1_1_tom_1_cn_04-25": 1}]);
+            let tabs = await page.evaluate(() => {
+                return  w2ui.layout_main_tabs.get();
+            });
+            expect(tabs).to.deep.equal(["tab0","doc_1_0_tom_1_cn_04-25","doc_1_1_tom_1_cn_04-25"]);
+
+
+            await page.click('#fldSearch',{clickCount: 3});
+            await page.type('#fldSearch','105-34');
+            await page.keyboard.press('Enter');
+            await page.waitForSelector("#node_cn_105-34");
+
+            divForEmbedDoc = await page.evaluate(() => {
+                return  [{"#doc_1_0_tom_1_cn_04-25":$("#doc_1_0_tom_1_cn_04-25").length},
+                    {"#doc_1_1_tom_1_cn_04-25":$("#doc_1_1_tom_1_cn_04-25").length}]
+            });
+            expect(divForEmbedDoc).to.deep.equal([{"#doc_1_0_tom_1_cn_04-25": 0},
+                                                  {"#doc_1_1_tom_1_cn_04-25": 0}]);
+
+            tabs = await page.evaluate(() => {
+                return  w2ui.layout_main_tabs.get();
+            });
+            expect(tabs).to.deep.equal(["tab0"]);
         });
 
     });
@@ -417,5 +461,65 @@ describe('test call with initial parameter', function() {
                 "certificate_2_04-25"
             ]);
         });
+});
+
+describe('test authe', function() {
+    let browser;
+    let page;
+    let page1;
+    let server;
+    let editAllToolBarArray;
+    // puppeteer options
+    const opts = {
+        headless: false,
+        defaultViewport: null,
+        args : ['--window-size=1350,800', '--lang=en-GB' ],
+        devtools: true,
+        //slowMo: 100,
+        timeout: 10000
+    };
+
+    before(async function() {
+        this.timeout(10000);
+        await setDBtestData(testData);
+        const app = require('../app');
+        //app.use(app.static('test'));
+        server = await app.listen(3000);
+
+        // Launch Puppeteer and navigate to the Express server
+        browser = await puppeteer.launch(opts);
+        page = await browser.newPage();
+        await page.goto('http://localhost:3000/?cadn=04-25');
+        await page.waitForSelector('#main');
+    });
+
+    after (async function(){
+        //await browser.close();
+        //await server.close();
+    });
+
+    it('test data', async function() {
+        this.timeout(10000);
+        let nodeId = await page.evaluate(() => {
+            return [
+                $("#node_cn_04-25 div.w2ui-node-caption").text(),
+                $("#node_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                $("#node_doc_1_0_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                $("#node_doc_1_1_tom_1_cn_04-25 div.w2ui-node-caption").text(),
+                $("#node_tom_2_cn_04-25 div.w2ui-node-caption").text(),
+                $("#node_doc_2_0_tom_2_cn_04-25 div.w2ui-node-caption").text(),
+                $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
+            ];
+        });
+        expect(nodeId).to.deep.equal([
+            "04-25",
+            "Vol 1",
+            "volume 1 inventory04-25",
+            "certificate_1_04-25",
+            "Vol 2",
+            "volume 2 inventory04-25",
+            "certificate_2_04-25"
+        ]);
+    });
 });
 

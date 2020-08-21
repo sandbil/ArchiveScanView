@@ -22,9 +22,9 @@ router.get('/', function(req, res, next) {
     //console.log(rootDirForScanDocs);
     res.sendFile(filePDF, options ,function (err) {
         if (err) {
-            //next(err)
-            winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-            res.status(404).send('scan image not found')
+            //winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+            //res.status(404).send('scan image not found')
+            next(err)
         } else {
             //console.log('Sent:', fileName)
             //todo loging who viewed doc

@@ -1,5 +1,4 @@
-const express = require('express');
-const router = express.Router();
+const router = require('express').Router();
 //var oraInvNum = require('../lib/oraInvNum');
 const dbSqlite = require('../lib/dbSqlite');
 const winston = require('../lib/winstonCfg');
@@ -33,10 +32,9 @@ router.all('/', function(req, res, next) {
                 }*/
             })
         .catch(function(err) {
-            //console.log('Ошибка Запрос завершился неудачей ', err);
-            winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-
-            res.status(500).send(p_cadn);
+            //winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+            //res.status(500).send(p_cadn);
+            next(err);
         });
 });
 

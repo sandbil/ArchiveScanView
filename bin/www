@@ -5,14 +5,14 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('scanEgrn:server');
+var debug = require('debug')('ArchiveScanView:server');
 var http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || (process.env.NODE_ENV || '').trim() === 'production' ? '3011' : '3000');
 app.set('port', port);
 
 /**

@@ -3,9 +3,19 @@ const path = require('path');
 const router = express.Router();
 const cfg = require('../lib/config');
 const winston = require('../lib/winstonCfg');
+const {sso} = require('node-expose-sspi');
 
 /* GET tree of documents . */
-router.get('/', function(req, res, next) {
+router.get('/', sso.auth(), function(req, res, next) {
+
+        console.log('sso.auth');
+        debug('sso');
+        if (!req.sso) {
+            req.session.user = ''
+        } else
+            req.session.user = req.sso.user;
+        //return res.redirect('/protected/welcome');
+
     //console.log(req);
     let file = req.query.filepdf
         , filePDF = path.join(cfg.rootDirForScanDocs, decodeURIComponent(file));

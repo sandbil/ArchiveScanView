@@ -51,17 +51,21 @@ app.use(function (req, res, next) {
 
     if (req.props.cadn) req.session.p_cadn = req.props.cadn;
     req.session.filepdf = req.props.filepdf;*/
+    const domain1 = sso.getDefaultDomain();
+    console.log(domain1);
 
     next()
 });
-app.use(sso.auth(),(req, res) =>  {
-    debug('sso');
+
+app.use(sso.auth(),(req, res,next) =>  {
     if (!req.sso) {
         req.session.user = ''
     } else
-         req.session.user = req.sso.user;
+        req.session.user = req.sso.user;
     //return res.redirect('/protected/welcome');
+    next();
 });
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/docstree', docsTreeRouter);

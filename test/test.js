@@ -3,6 +3,9 @@ const cfg = require('../lib/config')
 const puppeteer = require('puppeteer');
 const expect = require('chai').expect;
 let {testData,testTreeClass, treeTest}  = require('./testData');
+const cheerio = require('cheerio');
+const needle = require('needle');
+const {sso} = require('node-expose-sspi');
 
 function setDBtestData(testData, dbMem) {
     return new Promise(function(resolve, reject ) {
@@ -463,12 +466,11 @@ describe('test call with initial parameter', function() {
         });
 });
 
-describe('test authe', function() {
+describe('test Authentication', function() {
     let browser;
     let page;
     let page1;
     let server;
-    let editAllToolBarArray;
     // puppeteer options
     const opts = {
         headless: false,
@@ -483,14 +485,7 @@ describe('test authe', function() {
         this.timeout(10000);
         await setDBtestData(testData);
         const app = require('../app');
-        //app.use(app.static('test'));
         server = await app.listen(3000);
-
-        // Launch Puppeteer and navigate to the Express server
-        browser = await puppeteer.launch(opts);
-        page = await browser.newPage();
-        await page.goto('http://localhost:3000/?cadn=04-25');
-        await page.waitForSelector('#main');
     });
 
     after (async function(){
@@ -498,8 +493,51 @@ describe('test authe', function() {
         //await server.close();
     });
 
-    it('test data', async function() {
+    it('test returning error without authentication', async function() {
         this.timeout(10000);
+        let retErr = await needle('get', 'http://localhost:3000/getdoc')
+            .then(function(resp) {
+                return resp
+            })
+            .catch(function(err) {
+                return err
+            });
+        expect(retErr).to.have.property('statusCode', 401);
+        expect(retErr).to.have.property('statusMessage',"Unauthorized");
+        expect(retErr).to.have.property('headers');
+        expect(retErr.headers).to.have.property('www-authenticate', 'Negotiate');
+    });
+
+    it('test returning file after authentication', async function() {
+        this.timeout(10000);
+        //let response = await new sso.Client().fetch('http://localhost:3000');
+        //const json = await response.json();
+        //console.log('json: ', json);
+        // Launch Puppeteer and navigate to the Express server
+        browser = await puppeteer.launch(opts);
+        page = await browser.newPage();
+        let response =  await page.goto('http://localhost:3000/');
+        await page.waitForSelector('#main');
+
+        let headers = response.headers();
+        expect(response.status()).to.equal(200);
+        expect(headers).to.have.property('www-authenticate', 'Negotiate oRswGaADCgEAoxIEEAEAAABDh+CIwTbjqQAAAAA=');
+
+        response = await page.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');
+        headers = response.headers();
+        console.log(headers);
+        expect(response.status()).to.equal(200);
+        expect(headers).to.have.property('content-type', 'application/pdf');
+        expect(headers).to.have.property('content-length', '42361');
+
+    });
+
+
+
+
+    it('test returning data after sso Authentication', async function() {
+        this.timeout(10000);
+        await page.waitFor(1000);
         let nodeId = await page.evaluate(() => {
             return [
                 $("#node_cn_04-25 div.w2ui-node-caption").text(),

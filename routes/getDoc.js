@@ -6,17 +6,10 @@ const winston = require('../lib/winstonCfg');
 const {sso} = require('node-expose-sspi');
 
 /* GET tree of documents . */
-router.get('/', sso.auth(), function(req, res, next) {
-
-        console.log('sso.auth');
-        debug('sso');
-        if (!req.sso) {
-            req.session.user = ''
-        } else
-            req.session.user = req.sso.user;
-        //return res.redirect('/protected/welcome');
-
-    //console.log(req);
+router.get('/', function(req, res, next) {
+    if (!req.session.user) {
+        next(err)
+    }
     let file = req.query.filepdf
         , filePDF = path.join(cfg.rootDirForScanDocs, decodeURIComponent(file));
     console.log(filePDF);

@@ -16,7 +16,6 @@ router.all('/', function(req, res, next) {
     if (!p_cadn) {
             return res.json({_root: {nodes: []}});
     }
-    console.log('req.props: ',req.props);
 
     dbSqlite.getDocsTree(p_cadn)
         .then(data => {

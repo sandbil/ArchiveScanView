@@ -41,30 +41,33 @@ app.use(session({
 }));
 
 app.use(function (req, res, next) {
-    /*if (!req.session.p_cadn) {
-        req.session.p_cadn = ''
-    }
-    req.props = {};
-    if(req.query)  for (var attrname in req.query)  { req.props[attrname] = req.query[attrname]; }
-    if(req.params) for (var attrname in req.params) { req.props[attrname] = req.params[attrname]; }
-    if(req.body)   for (var attrname in req.body)   { req.props[attrname] = req.body[attrname]; }
-
-    if (req.props.cadn) req.session.p_cadn = req.props.cadn;
-    req.session.filepdf = req.props.filepdf;*/
-    const domain1 = sso.getDefaultDomain();
-    console.log(domain1);
-
-    next()
+    if (!req.session.user) {
+        console.log('!req.session.user');
+        const domain = sso.getDefaultDomain();
+        console.log('domain:',domain );
+        next();
+    } else {
+        next("route");
+    };
+}, sso.auth(), function (req, res, next) {
+    console.log('after sso');
+    if (!req.sso) {
+        //return res.redirect('/protected/welcome');
+    } else
+        req.session.user = req.sso.user;
+    console.log(req.session.user.displayName);
+    next();
 });
 
-app.use(sso.auth(),(req, res,next) =>  {
+/*app.use(sso.auth(),(req, res,next) =>  {
+    console.log ('req.sso:',req.sso);
     if (!req.sso) {
         req.session.user = ''
     } else
         req.session.user = req.sso.user;
     //return res.redirect('/protected/welcome');
     next();
-});
+});*/
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

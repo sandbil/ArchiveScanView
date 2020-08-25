@@ -199,6 +199,95 @@ describe('test  function', function() {
         );
     })
 });
+
+describe('test ', function() {
+describe('test Authentication', function() {
+    let browser;
+    let page;
+    let page1;
+    let server;
+    // puppeteer options
+    const opts = {
+        headless: false,
+        defaultViewport: null,
+        args : ['--window-size=1350,800', '--lang=en-GB' ],
+        devtools: true,
+        //slowMo: 100,
+        timeout: 10000
+    };
+
+    before(async function() {
+        this.timeout(10000);
+        await setDBtestData(testData);
+        const app = require('../app');
+        server = await app.listen(3000);
+        browser = await puppeteer.launch(opts);
+    });
+
+    after (async function(){
+        await browser.close();
+        await server.close();
+    });
+
+    it('test returning error without authentication', async function() {
+        this.timeout(10000);
+        let retErr = await needle('get', 'http://localhost:3000/getdoc')
+            .then(function(resp) {
+                return resp
+            })
+            .catch(function(err) {
+                return err
+            });
+        expect(retErr).to.have.property('statusCode', 401);
+        expect(retErr).to.have.property('statusMessage',"Unauthorized");
+        expect(retErr).to.have.property('headers');
+        expect(retErr.headers).to.have.property('www-authenticate', 'Negotiate');
+    });
+
+    it('test get docsTree', async function() {
+        this.timeout(10000);
+        page = await browser.newPage();
+        let result = await page.goto('http://localhost:3000/docstree?cadn=04-25');
+        expect(result.status()).to.equal(200);
+        expect(result.headers()).to.have.property('content-type', 'application/json; charset=utf-8');
+        let treeJson = await page.evaluate(() => {
+            return  document.querySelector("body > pre").innerText
+        });
+        expect(JSON.parse(treeJson)).to.deep.equal(treeTest);
+
+        result = await page.goto('http://localhost:3000/docstree?cadn=04-251');
+        expect(result.status()).to.equal(200);
+        expect(result.headers()).to.have.property('content-type', 'application/json; charset=utf-8');
+        treeJson = await page.evaluate(() => {
+            return  document.querySelector("body > pre").innerText
+        });
+        expect(JSON.parse(treeJson)).to.deep.equal({"_root": null, "error": "the object not found"});
+    });
+
+    it('test returning file after authentication', async function() {
+        this.timeout(10000);
+        //let response = await new sso.Client().fetch('http://localhost:3000');
+        //const json = await response.json();
+        //console.log('json: ', json);
+        // Launch Puppeteer and navigate to the Express server
+        page = await browser.newPage();
+        let response =  await page.goto('http://localhost:3000/');
+        await page.waitForSelector('#main');
+
+        let headers = response.headers();
+        expect(response.status()).to.equal(200);
+        expect(headers).to.have.property('www-authenticate', 'Negotiate oRswGaADCgEAoxIEEAEAAABDh+CIwTbjqQAAAAA=');
+
+        let page1 = await browser.newPage();
+        response = await page1.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');
+        headers = response.headers();
+        console.log(headers);
+        expect(response.status()).to.equal(200);
+        expect(headers).to.have.property('content-type', 'application/pdf');
+        expect(headers).to.have.property('content-length', '42361');
+
+    });
+});
 describe('test  Interface', function() {
     let browser;
     let page;
@@ -230,67 +319,12 @@ describe('test  Interface', function() {
     });
 
     after (async function(){
-        //await browser.close();
-        //await server.close();
+        await browser.close();
+        await server.close();
     });
-
-    describe('test ', function() {
 
         beforeEach(async function () {
             await page.waitForSelector('#fldSearch');
-        });
-        function responseParse(url) {
-            let request = require("request");
-            return new Promise(function(resolve, reject) {
-                request({url : url},
-                    function (error, response, body) {
-                        if (error) {
-                            console.log('Couldn’t get page because of error: ' + error);
-                            reject(error);
-                            return;
-                        } else if (response.statusCode !== 200) {
-                            //let err = new Error('Response error');
-                            //err.message = response.statusCode + ' ' + body;
-                            //console.log('Couldn’t get page because of response error: ' + err);
-                            //reject(err);
-                            resolve(response);
-                            return;
-                        }
-                        resolve(response);
-                    });
-            });
-        }
-
-        it('test get docsTree', async function() {
-            this.timeout(10000);
-            let result = await responseParse('http://localhost:3000/docstree?cadn=04-25');
-            expect(result).to.have.property('statusCode', 200);
-            expect(result).to.have.property('headers');
-            expect(result.headers).to.have.property('content-type', 'application/json; charset=utf-8');
-            expect(JSON.parse(result.body)).to.deep.equal(treeTest);
-
-            result = await responseParse('http://localhost:3000/docstree?cadn=04-251');
-            expect(result).to.have.property('statusCode', 200);
-            expect(result).to.have.property('headers');
-            expect(result.headers).to.have.property('content-type', 'application/json; charset=utf-8');
-            expect(JSON.parse(result.body)).to.deep.equal({"_root": null, "error": "the object not found"});
-        });
-
-        it('test get docs file', async function() {
-            this.timeout(10000);
-            let result = await responseParse('http://localhost:3000/getdoc?filepdf=inventory.pdf');
-            //console.log(result);
-            expect(result).to.have.property('statusCode', 200);
-            expect(result).to.have.property('headers');
-            expect(result.headers).to.have.property('content-type', 'application/pdf');
-            expect(result.headers).to.have.property('content-length', '42361');
-
-            result = await responseParse('http://localhost:3000/getdoc?filepdf=sample1.pdf');
-            //console.log(result);
-            expect(result).to.have.property('statusCode', 404);
-            expect(result).to.have.property('headers');
-            expect(result.headers).to.have.property('content-type', 'text/html; charset=utf-8');
-            expect(result.body.slice(0,32)).to.equal("<h1>Oops an error occurred!</h1>");
         });
 
         it('test search cadn', async function() {
@@ -381,7 +415,7 @@ describe('test  Interface', function() {
             let tabs = await page.evaluate(() => {
                 return  w2ui.layout_main_tabs.get();
             });
-            expect(tabs).to.deep.equal(["tab0","doc_1_0_tom_1_cn_04-25","doc_1_1_tom_1_cn_04-25"]);
+            expect(tabs.sort()).to.deep.equal(["doc_1_0_tom_1_cn_04-25","doc_1_1_tom_1_cn_04-25", "tab0"]);
 
 
             await page.click('#fldSearch',{clickCount: 3});
@@ -402,14 +436,11 @@ describe('test  Interface', function() {
             expect(tabs).to.deep.equal(["tab0"]);
         });
 
-    });
-
 });
 
 describe('test call with initial parameter', function() {
     let browser;
     let page;
-    let page1;
     let server;
     let editAllToolBarArray;
     // puppeteer options
@@ -441,8 +472,9 @@ describe('test call with initial parameter', function() {
         //await server.close();
     });
 
-    it('test data', async function() {
+    it('test tree data', async function() {
             this.timeout(10000);
+            await page.waitFor(1000);
             let nodeId = await page.evaluate(() => {
                 return [
                     $("#node_cn_04-25 div.w2ui-node-caption").text(),
@@ -466,98 +498,4 @@ describe('test call with initial parameter', function() {
         });
 });
 
-describe('test Authentication', function() {
-    let browser;
-    let page;
-    let page1;
-    let server;
-    // puppeteer options
-    const opts = {
-        headless: false,
-        defaultViewport: null,
-        args : ['--window-size=1350,800', '--lang=en-GB' ],
-        devtools: true,
-        //slowMo: 100,
-        timeout: 10000
-    };
-
-    before(async function() {
-        this.timeout(10000);
-        await setDBtestData(testData);
-        const app = require('../app');
-        server = await app.listen(3000);
-    });
-
-    after (async function(){
-        //await browser.close();
-        //await server.close();
-    });
-
-    it('test returning error without authentication', async function() {
-        this.timeout(10000);
-        let retErr = await needle('get', 'http://localhost:3000/getdoc')
-            .then(function(resp) {
-                return resp
-            })
-            .catch(function(err) {
-                return err
-            });
-        expect(retErr).to.have.property('statusCode', 401);
-        expect(retErr).to.have.property('statusMessage',"Unauthorized");
-        expect(retErr).to.have.property('headers');
-        expect(retErr.headers).to.have.property('www-authenticate', 'Negotiate');
-    });
-
-    it('test returning file after authentication', async function() {
-        this.timeout(10000);
-        //let response = await new sso.Client().fetch('http://localhost:3000');
-        //const json = await response.json();
-        //console.log('json: ', json);
-        // Launch Puppeteer and navigate to the Express server
-        browser = await puppeteer.launch(opts);
-        page = await browser.newPage();
-        let response =  await page.goto('http://localhost:3000/');
-        await page.waitForSelector('#main');
-
-        let headers = response.headers();
-        expect(response.status()).to.equal(200);
-        expect(headers).to.have.property('www-authenticate', 'Negotiate oRswGaADCgEAoxIEEAEAAABDh+CIwTbjqQAAAAA=');
-
-        response = await page.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');
-        headers = response.headers();
-        console.log(headers);
-        expect(response.status()).to.equal(200);
-        expect(headers).to.have.property('content-type', 'application/pdf');
-        expect(headers).to.have.property('content-length', '42361');
-
-    });
-
-
-
-
-    it('test returning data after sso Authentication', async function() {
-        this.timeout(10000);
-        await page.waitFor(1000);
-        let nodeId = await page.evaluate(() => {
-            return [
-                $("#node_cn_04-25 div.w2ui-node-caption").text(),
-                $("#node_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                $("#node_doc_1_0_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                $("#node_doc_1_1_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                $("#node_tom_2_cn_04-25 div.w2ui-node-caption").text(),
-                $("#node_doc_2_0_tom_2_cn_04-25 div.w2ui-node-caption").text(),
-                $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
-            ];
-        });
-        expect(nodeId).to.deep.equal([
-            "04-25",
-            "Vol 1",
-            "volume 1 inventory04-25",
-            "certificate_1_04-25",
-            "Vol 2",
-            "volume 2 inventory04-25",
-            "certificate_2_04-25"
-        ]);
-    });
-});
-
+})

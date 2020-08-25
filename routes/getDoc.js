@@ -3,11 +3,13 @@ const path = require('path');
 const router = express.Router();
 const cfg = require('../lib/config');
 const winston = require('../lib/winstonCfg');
-const {sso} = require('node-expose-sspi');
+//const {sso} = require('node-expose-sspi');
 
-/* GET tree of documents . */
+/* GET PDF document . */
 router.get('/', function(req, res, next) {
+    console.log('getDoc: ',req.query.filepdf);
     if (!req.session.user) {
+        console.log('!req.session.user');
         next(err)
     }
     let file = req.query.filepdf

@@ -47,6 +47,7 @@ app.use(function (req, res, next) {
         console.log('domain:',domain );
         next();
     } else {
+        console.log('next("route")');
         next("route");
     };
 }, sso.auth(), function (req, res, next) {

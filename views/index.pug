@@ -2,13 +2,9 @@ extends layout
 
 block content
   div(id="main" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;")
-  script w2ui.cadn = "#{cadn}"; console.log(w2ui);
-  if user
-    p Hello #{user.displayName}
-    button.primary(onclick="window.location.href = '/action/disconnect'") Disconnect
-  else
-    p Nobody is connected.
-    button.primary(onclick="window.location.href = '/login'")  Login
+  script.
+    w2ui.cadn = "#{cadn}";
+    w2ui.userName = '#{user.displayName}'
   script(src='/javascripts/main.js')
 
 

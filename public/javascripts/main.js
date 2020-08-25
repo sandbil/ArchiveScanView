@@ -18,19 +18,7 @@ let config = {
         padding: 0,
         panels: [
             //{ type: 'top', size: 32, content: '<div>Top Panel</div>', style: 'border-bottom: 1px solid silver;' },
-            { type: 'top', size: 32, style: 'border-bottom: 1px solid silver;',
-                /* toolbar: {
-                     items: [
-                         { type: 'check',  id: 'item1', caption: 'Check', img: 'icon-page', checked: true },
-                         { type: 'spacer' },
-                         { type: 'button',  id: 'item5',  caption: 'Item 5', icon: 'w2ui-icon-check', hint: 'Hint for item 5' }
-                     ],
-                     onClick: function (event) {
-                         //this.owner.content('main', event);
-                         w2ui.layout.html('main', event);
-                     }
-                 }*/
-            },
+            { type: 'top', size: 32, style: 'border-bottom: 1px solid silver;'},
             { type: 'left', size: 400, resizable: true, minSize: 200,
                 toolbar: {
                     items: [
@@ -45,7 +33,6 @@ let config = {
                                     '</div>';
                             }
                         },
-                        { type: 'break' },
                         { type: 'button', id: 'item6', icon: 'icon-reload', text: w2utils.lang('Refresh'),
                             tooltip: 'Click to refresh the entire list of documents',
                             onClick: function (event) { searchCadn(this.get('idFldSearch').value)}
@@ -70,8 +57,14 @@ let config = {
                     }
                 }
             },
-            { type: 'bottom', size: 16, content: '<div>bottom Panel</div>', style: 'border-bottom: 1px solid silver;' },
+            { type: 'bottom', size: 16, content: '<div></div>', style: 'border-bottom: 1px solid silver;' },
         ]
+    },
+    toptoolbar: { name: 'toptoolbar',items: [
+        {type: 'html',  id: 'idFldSearch',
+            html:'<h3>ArchiveScanView</h3>'},
+            { type: 'spacer' },
+            { type: 'button',  id: 'userName',  caption: `${w2ui.userName}`}]
     },
     sidebar: {
         name: 'sidebar',
@@ -144,8 +137,8 @@ $(function () {
     // initialization
     w2utils.locale(navigator.language);
     $('#main').w2layout(config.layout);
-    //w2ui.layout.content('top',$('#toolbar').w2toolbar(config.js.topToolBar));
     w2ui.layout.html('left', $().w2sidebar(config.sidebar));
 
+    w2ui.layout.content('top',$().w2toolbar(config.toptoolbar));
     searchCadn(w2ui.cadn);
 });

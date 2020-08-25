@@ -197,7 +197,15 @@ describe('test  function', function() {
              "nodes": []
             }
         );
-    })
+    });
+
+    it('test getOraScanDocsList', async function() {
+        var dbSqlite = require('../lib/dbSqlite');
+
+        let res = await dbSqlite.getOraScanDocsList('04-25');
+
+
+    });
 });
 
 describe('test with server', function() {

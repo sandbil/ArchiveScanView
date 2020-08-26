@@ -209,14 +209,14 @@ describe('test  function', function() {
         /*expect(async function () {
                 await dbSqlite.getOraScanDocsList('25-04',10)
             }).to.throw(new Error('getRows(): Got 10 rows. Possibly more than 10 documents'));*/ //todo
-        let res = await dbSqlite.getOraScanDocsList('75:32:040508:2559',500);
+        let res = await dbSqlite.getOraScanDocsList('25-04',500);
         expect(res.length).to.equal(43);
     });
 
     it('test getOracleDocsTree', async function() {
         this.timeout(10000);
         var dbSqlite = require('../lib/dbSqlite');
-        let tree = await dbSqlite.getOracleDocsTree('75:32:040508:2559',500);
+        let tree = await dbSqlite.getOracleDocsTree('25-04',500);
         expect(tree).to.have.property('_root');
         expect(tree['_root']).to.have.property("id", "arrayDocsTree");
     });

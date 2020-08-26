@@ -89,7 +89,7 @@ let config = {
                     $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>');
                     // w2ui.layout.html('main', 'New tab added' + event.object.objData.fullName);
                     tabs.select(event.target);
-                    PDFObject.embed("/getdoc?filepdf=" + event.object.fileImg, "#"+event.target, options);
+                    PDFObject.embed("/getdoc?filepdf=" + event.object.fileImg, "#"+CSS.escape(event.target), options);
                 }
             }
         }

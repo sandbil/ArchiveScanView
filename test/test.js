@@ -200,12 +200,27 @@ describe('test  function', function() {
     });
 
     it('test getOraScanDocsList', async function() {
+        this.timeout(10000);
         var dbSqlite = require('../lib/dbSqlite');
 
-        let res = await dbSqlite.getOraScanDocsList('04-25');
+        //let respromise = await dbSqlite.getOraDocsList('25-04',10);
+        //expect(respromise.length).to.equal(16);
 
-
+        /*expect(async function () {
+                await dbSqlite.getOraScanDocsList('25-04',10)
+            }).to.throw(new Error('getRows(): Got 10 rows. Possibly more than 10 documents'));*/ //todo
+        let res = await dbSqlite.getOraScanDocsList('25-04',500);
+        expect(res.length).to.equal(16);
     });
+
+    it('test getOracleDocsTree', async function() {
+        this.timeout(10000);
+        var dbSqlite = require('../lib/dbSqlite');
+        let tree = await dbSqlite.getOracleDocsTree('25-04',500);
+        expect(tree).to.have.property('_root');
+        expect(tree['_root']).to.have.property("id", "arrayDocsTree");
+    });
+
 });
 
 describe('test with server', function() {

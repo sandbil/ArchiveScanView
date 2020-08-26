@@ -1,0 +1,5 @@
+# Created by .ignore support plugin (hsz.mobi)
+/db/
+/logs/
+node_modules/
+!/lib/config.js

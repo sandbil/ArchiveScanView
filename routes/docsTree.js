@@ -1,11 +1,12 @@
 const router = require('express').Router();
+require('express-async-errors');
 //var oraInvNum = require('../lib/oraInvNum');
 const dbSqlite = require('../lib/dbSqlite');
 const winston = require('../lib/winstonCfg');
 
 
 /* GET tree of documents . */
-router.all('/', function(req, res, next) {
+router.all('/', async function(req, res, next) {
 
     req.props = {};
     if(req.query)  for (let attrname in req.query)  { req.props[attrname] = req.query[attrname]; }
@@ -16,25 +17,9 @@ router.all('/', function(req, res, next) {
     if (!p_cadn) {
             return res.json({_root: {nodes: []}});
     }
-
-    dbSqlite.getDocsTree(p_cadn)
-        .then(data => {
-                //console.log(data.length);
-                return res.json(data);
-                //console.log('XMLH ttpRequest ',req.headers["x-requested-with"] == 'XMLHttpRequest');
-               /* if (req.headers["x-requested-with"] == 'XMLHttpRequest') {
-                    //if ajax request, return only table
-                    res.render('invNmbTable', { data: data, cadn: p_cadn, usr: p_usr});
-                } else {
-                    //return full page
-                   return res.send(JSON.stringify(data));
-                }*/
-            })
-        .catch(function(err) {
-            //winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-            //res.status(500).send(p_cadn);
-            next(err);
-        });
+    //let data = await dbSqlite.getDocsTree(p_cadn);
+    let data = await dbSqlite.getOracleDocsTree(p_cadn);
+    return res.json(data);
 });
 
 module.exports = router;

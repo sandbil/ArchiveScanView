@@ -48,12 +48,12 @@ let config = {
                     onClick: function (event) {
                        // w2ui.layout.html('main', 'Active tab: '+ event.target);
                         $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
-                        $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
+                        $('#layout_layout_panel_main .w2ui-panel-content #' + CSS.escape(event.target)).show();
                         w2ui.sidebar.select(event.target);
                     },
                     onClose: function (event) {
                         this.click('tab0');
-                        $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).remove();
+                        $('#layout_layout_panel_main .w2ui-panel-content #' + CSS.escape(event.target)).remove();
                     }
                 }
             },
@@ -73,19 +73,18 @@ let config = {
 
         ],
         onDblClick: function (event) {
-            console.log(event.target);
-            console.log(event.object.tag);
+
             const tabs = w2ui.layout_main_tabs;
             if (tabs.get(event.target)) {
-                //tabs.select(event.target);
-                //w2ui.layout.html('main', 'Tab Selected');
+
                 $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
                 tabs.select(event.target);
-                $('#layout_layout_panel_main .w2ui-panel-content #' + event.target).show();
+                $('#layout_layout_panel_main .w2ui-panel-content #' + CSS.escape(event.target)).show();
             } else {
                 if (event.target.slice(0,3) === 'doc'){
                     $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
                     tabs.add({ id: event.target, text: event.object.text, closable: true });
+                    tabs.scroll('right');
                     $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>');
                     // w2ui.layout.html('main', 'New tab added' + event.object.objData.fullName);
                     tabs.select(event.target);
@@ -102,7 +101,7 @@ function changeCadn(cadn) {
     let tabs = tb.get();
     tabs.splice(tabs.indexOf('tab0'), 1);
     tabs.forEach(tab => {
-        $("#"+tab).remove()
+        $("#"+CSS.escape(tab)).remove()
     });
     tb.remove.apply(tb, tabs);
 

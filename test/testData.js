@@ -36,47 +36,47 @@ exports.testData = {
 
 exports.testTreeClass = [
     {"id": "cn_04-25","text": "04-25","img": "icon-folder","objData": "objData","expanded": true, "nodes": [
-       {"id": "tom_1_cn_04-25","text": "Vol 1", "img": "icon-folder","expanded": true, "nodes": [
+       {"id": "tom_1_cn_04-25","text": "Vol 1", "img": "icon-folder","expanded": true, "objData": "objData","nodes": [
           {"id": "doc_1_0_tom_1_cn_04-25", "text": "volume 1 inventory04-25","img": "icon-page","objData": "docData", "fileImg": "inventory.pdf", "nodes": []},
           {"id": "doc_1_1_tom_1_cn_04-25","text": "certificate_1_04-25","img": "icon-page","objData": "docData","fileImg": "certificate_1_at_05-03-2003.1.pdf", "nodes": []}
        ]},
-       { "id": "tom_2_cn_04-25","text": "Vol 2","img": "icon-folder", "expanded": true, "nodes": [
+       { "id": "tom_2_cn_04-25","text": "Vol 2","img": "icon-folder", "expanded": true, "objData": "objData", "nodes": [
           {"id": "doc_2_0_tom_2_cn_04-25","text": "volume 2 inventory04-25","img": "icon-page","objData": "docData", "fileImg": "inventory2.pdf", "nodes": []},
           {"id": "doc_2_1_tom_2_cn_04-25", "text": "certificate_2_04-25", "img": "icon-page","objData": "docData", "fileImg": "certificate_2_at_11-01-2006.5.pdf", "nodes": []}
        ]}
     ]},
     {"id": "cn_105-34","text": "105-34","img": "icon-folder","objData": "objData", "expanded": true,"nodes": [
-       {"id": "tom_1_cn_105-34", "text": "Vol 1","img": "icon-folder", "expanded": true,"nodes": [
+       {"id": "tom_1_cn_105-34", "text": "Vol 1","img": "icon-folder", "expanded": true, "objData": "objData","nodes": [
           {"id": "doc_1_0_tom_1_cn_105-34","text": "volume inventory105-34","img": "icon-page","objData": "docData","fileImg": "inventory3.pdf","nodes": []},
           {"id": "doc_1_1_tom_1_cn_105-34","text": "reference_at_105-34", "img": "icon-page","objData": "docData", "fileImg": "reference_at_10-10-1998.1.pdf", "nodes": []}
        ]}
     ]},
     {"id": "cn_7504-36", "text": "7504-36", "img": "icon-folder", "objData": "objData","expanded": true, "nodes": [
-       {"id": "tom__cn_7504-36", "text": "Vol ","img": "icon-folder","expanded": true,"nodes": [
+       {"id": "tom__cn_7504-36", "text": "Vol ","img": "icon-folder","expanded": true, "objData": "objData", "nodes": [
           {"id": "doc__0_tom__cn_7504-36","text": "volume inventory7504-36", "img": "icon-page", "objData": "docData", "fileImg": "inventory4.pdf", "nodes": []},
           {"id": "doc__1_tom__cn_7504-36","text": "certificate_1_7504-36","img": "icon-page", "objData": "docData","fileImg": "certificate_1_at_05-03-2003.1.pdf","nodes": []}
        ]},
-       {"id": "tom_1_cn_7504-36", "text": "Vol 1","img": "icon-folder","expanded": true,"nodes": [
+       {"id": "tom_1_cn_7504-36", "text": "Vol 1","img": "icon-folder","expanded": true, "objData": "objData", "nodes": [
           {"id": "doc_1_0_tom_1_cn_7504-36", "text": "volume 1 inventory7504-36","img": "icon-page","objData": "docData","fileImg": "inventory5.pdf", "nodes": []},
           {"id": "doc_1_1_tom_1_cn_7504-36","text": "certificate_2_7504-36","img": "icon-page","objData": "docData", "fileImg": "certificate_2_at_11-01-2006.5.pdf", "nodes": []}
        ]}
     ]}
 ];
 
-exports.treeTest = {
+exports.treeTestOneObject = {
+    "multiObjectsDocs":false,
     "_root": {
         "id": "arrayDocsTree",
-        "nodes": [{
-            "id": "cn_04-25",
-            "text": "04-25",
-            "img": "icon-folder",
-            "objData": {"cadn": "04-25", "invn": "321", "adr": "34 New Road London W34 8TN"},
-            "expanded": true,
             "nodes": [{
                 "id": "tom_1_cn_04-25",
                 "text": "Vol 1",
                 "img": "icon-folder",
                 "expanded": true,
+                "objData": {
+                    "adr": "34 New Road London W34 8TN",
+                    "cadn": "04-25",
+                    "invn": "321"
+                },
                 "nodes": [{
                     "id": "doc_1_0_tom_1_cn_04-25",
                     "text": "volume 1 inventory04-25",
@@ -109,6 +109,11 @@ exports.treeTest = {
                 "text": "Vol 2",
                 "img": "icon-folder",
                 "expanded": true,
+                "objData": {
+                    "adr": "34 New Road London W34 8TN",
+                    "cadn": "04-25",
+                    "invn": "321"
+                },
                 "nodes": [{
                     "id": "doc_2_0_tom_2_cn_04-25",
                     "text": "volume 2 inventory04-25",
@@ -137,7 +142,6 @@ exports.treeTest = {
                     "nodes": []
                 }]
             }]
-        }]
     }
 }
 

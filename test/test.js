@@ -2,7 +2,7 @@
 const cfg = require('../lib/config')
 const puppeteer = require('puppeteer');
 const expect = require('chai').expect;
-let {testData,testTreeClass, treeTest}  = require('./testData');
+let {testData, testTreeClass, treeTestOneObject}  = require('./testData');
 const cheerio = require('cheerio');
 const needle = require('needle');
 const {sso} = require('node-expose-sspi');
@@ -43,7 +43,7 @@ describe('test  function', function() {
             let tomId  = ['tom', el.vol_nmb, cadnId].join('_');
             let docId  = ['doc', el.vol_nmb,el.ordr, tomId].join('_');
             tree._addNode(cadnId, el.cad_number,'icon-folder','arrayDocsTree', 'objData');
-            tree._addNode(tomId, 'Vol ' + el.vol_nmb,'icon-folder', cadnId);
+            tree._addNode(tomId, 'Vol ' + el.vol_nmb,'icon-folder', cadnId, 'objData');
             tree._addNode(docId, el.full_name_doc, 'icon-page', tomId, 'docData', el.file_img);
         });
         let allItem = [];
@@ -138,7 +138,7 @@ describe('test  function', function() {
 
     it('test dbSqlite.createDocsTree function ', async function() {
         let dbSqlite = require('../lib/dbSqlite');
-        let tree = await dbSqlite.createDocsTree(testData.data);
+        let tree = await dbSqlite.createDocsTree(testData.data, true);
         let allItem = [];
         tree._traverse((node) => {
             allItem.push({[node.id]:node.text, fileImg: node.fileImg});
@@ -209,14 +209,14 @@ describe('test  function', function() {
         /*expect(async function () {
                 await dbSqlite.getOraScanDocsList('25-04',10)
             }).to.throw(new Error('getRows(): Got 10 rows. Possibly more than 10 documents'));*/ //todo
-        let res = await dbSqlite.getOraScanDocsList('25-04',500);
-        expect(res.length).to.equal(43);
+        let res = await dbSqlite.getOraScanDocsList('04-25',500);
+        expect(res.length).to.equal(15);
     });
 
     it('test getOracleDocsTree', async function() {
         this.timeout(10000);
         var dbSqlite = require('../lib/dbSqlite');
-        let tree = await dbSqlite.getOracleDocsTree('25-04',500);
+        let tree = await dbSqlite.getOracleDocsTree('04-25',500);
         expect(tree).to.have.property('_root');
         expect(tree['_root']).to.have.property("id", "arrayDocsTree");
     });
@@ -276,7 +276,7 @@ describe('test Authentication', function() {
         let treeJson = await page.evaluate(() => {
             return  document.querySelector("body > pre").innerText
         });
-        expect(JSON.parse(treeJson)).to.deep.equal(treeTest);
+        expect(JSON.parse(treeJson)).to.deep.equal(treeTestOneObject);
 
         result = await page.goto('http://localhost:3000/docstree?cadn=04-251');
         expect(result.status()).to.equal(200);
@@ -355,27 +355,14 @@ describe('test  Interface', function() {
             await page.click('#fldSearch');
             await page.type('#fldSearch','04-25');
             await page.keyboard.press('Enter');
-            await page.waitForSelector("#node_cn_04-25");
+            await page.waitForSelector("#node_tom_1_cn_04-25");
             let nodeId = await page.evaluate(() => {
-                return [
-                $("#node_cn_04-25 div.w2ui-node-caption").text(),
-                  $("#node_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_1_0_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_1_1_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                  $("#node_tom_2_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_2_0_tom_2_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
-            ];
+                return w2ui.sidebar.get();
             });
-            expect(nodeId).to.deep.equal([
-                "04-25",
-                "Vol 1",
-                "volume 1 inventory04-25",
-                "certificate_1_04-25",
-                "Vol 2",
-                "volume 2 inventory04-25",
-                "certificate_2_04-25"
-            ]);
+            expect(nodeId).to.deep.equal(
+                ["tom_1_cn_04-25", "doc_1_0_tom_1_cn_04-25", "doc_1_1_tom_1_cn_04-25",
+                    "tom_2_cn_04-25", "doc_2_0_tom_2_cn_04-25", "doc_2_1_tom_2_cn_04-25"]
+            );
         });
 
         it('test click on a doc in the docs tree and close the tab', async function() {
@@ -383,7 +370,7 @@ describe('test  Interface', function() {
             await page.click('#fldSearch',{clickCount: 3});
             await page.type('#fldSearch','04-25');
             await page.keyboard.press('Enter');
-            await page.waitForSelector("#node_cn_04-25");
+            await page.waitForSelector("#node_tom_1_cn_04-25");
 
             let divForEmbedDoc = await page.evaluate(() => {
                 return  $("#doc_1_0_tom_1_cn_04-25").length
@@ -420,7 +407,7 @@ describe('test  Interface', function() {
             await page.click('#fldSearch',{clickCount: 3});
             await page.type('#fldSearch','04-25');
             await page.keyboard.press('Enter');
-            await page.waitForSelector("#node_cn_04-25");
+            await page.waitForSelector("#node_tom_1_cn_04-25");
 
             await Promise.all([
                 page.waitForSelector('#doc_1_0_tom_1_cn_04-25'),
@@ -444,7 +431,7 @@ describe('test  Interface', function() {
             await page.click('#fldSearch',{clickCount: 3});
             await page.type('#fldSearch','105-34');
             await page.keyboard.press('Enter');
-            await page.waitForSelector("#node_cn_105-34");
+            await page.waitForSelector("#node_tom_1_cn_105-34");
 
             divForEmbedDoc = await page.evaluate(() => {
                 return  [{"#doc_1_0_tom_1_cn_04-25":$("#doc_1_0_tom_1_cn_04-25").length},
@@ -499,25 +486,12 @@ describe('test call with initial parameter', function() {
             this.timeout(10000);
             await page.waitFor(1000);
             let nodeId = await page.evaluate(() => {
-                return [
-                    $("#node_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_1_0_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_1_1_tom_1_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_tom_2_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_2_0_tom_2_cn_04-25 div.w2ui-node-caption").text(),
-                    $("#node_doc_2_1_tom_2_cn_04-25 div.w2ui-node-caption").text()
-                ];
+                return w2ui.sidebar.get();
             });
-            expect(nodeId).to.deep.equal([
-                "04-25",
-                "Vol 1",
-                "volume 1 inventory04-25",
-                "certificate_1_04-25",
-                "Vol 2",
-                "volume 2 inventory04-25",
-                "certificate_2_04-25"
-            ]);
+            expect(nodeId).to.deep.equal(
+                ["tom_1_cn_04-25", "doc_1_0_tom_1_cn_04-25", "doc_1_1_tom_1_cn_04-25",
+                 "tom_2_cn_04-25", "doc_2_0_tom_2_cn_04-25", "doc_2_1_tom_2_cn_04-25"]
+            );
         });
 });
 

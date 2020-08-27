@@ -17,8 +17,8 @@ router.all('/', async function(req, res, next) {
     if (!p_cadn) {
             return res.json({_root: {nodes: []}});
     }
-    //let data = await dbSqlite.getDocsTree(p_cadn);
-    let data = await dbSqlite.getOracleDocsTree(p_cadn);
+    let data = await dbSqlite.getDocsTree(p_cadn);
+    //let data = await dbSqlite.getOracleDocsTree(p_cadn);
     return res.json(data);
 });
 

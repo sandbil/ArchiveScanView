@@ -24,16 +24,16 @@ let config = {
                     items: [
                         { type: 'html',  id: 'idFldSearch',
                             html: function (item) {
-                                return '<div style="padding: 3px 10px;"> '+
+                                return '<div style="padding: 3px 10px; "> '+
                                     w2utils.lang('Cad. №:')+
                                     '    <input id="fldSearch" size="20" placeholder="'+
                                     w2utils.lang('Enter cad.number')+
                                     '" onchange="changeCadn(this.value)" '+
-                                    '         style="padding: 3px; border-radius: 2px; border: 1px solid silver" value="'+ (item.value || '') +'"/>'+
+                                    '         style="font-size: 13px; padding: 3px; border-radius: 2px; border: 1px solid silver" value="'+ (item.value || '') +'"/>'+
                                     '</div>';
                             }
                         },
-                        { type: 'button', id: 'item6', icon: 'icon-reload', text: w2utils.lang('Refresh'),
+                        { type: 'button', id: 'itemRefresh', icon: 'icon-reload', text: w2utils.lang('Refresh'),
                             tooltip: 'Click to refresh the entire list of documents',
                             onClick: function (event) { searchCadn(this.get('idFldSearch').value)}
                         }
@@ -46,14 +46,13 @@ let config = {
                     active: 'tab0',
                     tabs: [{ id: 'tab0', text: 'Initial Tab' }],
                     onClick: function (event) {
-                       // w2ui.layout.html('main', 'Active tab: '+ event.target);
-                        $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
-                        $('#layout_layout_panel_main .w2ui-panel-content #' + CSS.escape(event.target)).show();
+                        $(w2ui.layout.el('main')).find(".divtab").hide();
+                        $(w2ui.layout.el('main')).find('#' + CSS.escape(event.target)).show();
                         w2ui.sidebar.select(event.target);
                     },
                     onClose: function (event) {
                         this.click('tab0');
-                        $('#layout_layout_panel_main .w2ui-panel-content #' + CSS.escape(event.target)).remove();
+                        $(w2ui.layout.el('main')).find('#' + CSS.escape(event.target)).remove();
                     }
                 }
             },
@@ -72,21 +71,18 @@ let config = {
         nodes: [
 
         ],
-        onDblClick: function (event) {
-
+        onClick: function (event) {
             const tabs = w2ui.layout_main_tabs;
             if (tabs.get(event.target)) {
-
-                $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
+                $(w2ui.layout.el('main')).find(".divtab").hide();
                 tabs.select(event.target);
-                $('#layout_layout_panel_main .w2ui-panel-content #' + CSS.escape(event.target)).show();
+                $(w2ui.layout.el('main')).find('#' + CSS.escape(event.target)).show();
             } else {
                 if (event.target.slice(0,3) === 'doc'){
-                    $('#layout_layout_panel_main .w2ui-panel-content .divtab').hide();
+                    $(w2ui.layout.el('main')).find(".divtab").hide();
                     tabs.add({ id: event.target, text: event.object.text, closable: true });
                     tabs.scroll('right');
-                    $("#layout_layout_panel_main .w2ui-panel-content").append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>');
-                    // w2ui.layout.html('main', 'New tab added' + event.object.objData.fullName);
+                    $(w2ui.layout.el('main')).append('<div id="'+event.target+'" class = "divtab">'+event.object.text+'</div>');
                     tabs.select(event.target);
                     PDFObject.embed("/getdoc?filepdf=" + event.object.fileImg, "#"+CSS.escape(event.target), options);
                 }
@@ -120,8 +116,17 @@ function searchCadn(cadn) {
                 w2alert(cadn + ' - ' + w2utils.lang(data.error));
                 w2ui.sidebar.unlock();
             } else {
-                w2ui['sidebar'].nodes = [];
-                w2ui['sidebar'].add(data._root.nodes);
+                if (!data._root.multiObjectsDocs)
+                    w2ui['sidebar'].nodes = [];
+                w2ui.sidebar.add(data._root.nodes);
+                data._root.nodes.forEach(item =>{
+                    if (item.objData) {
+                        w2ui.layout.content("main",
+                            "cadn:" + item.objData.cadn +
+                            " invn:" + item.objData.invn +
+                            " adr:" + item.objData.adr );
+                    }
+                })
                 w2ui.sidebar.unlock();
             }
         },

@@ -13,7 +13,7 @@ function setDBtestData(testData, dbMem) {
         if (dbMem) {
             db = require('better-sqlite3')(':memory:');
         } else {
-            db = require('better-sqlite3')([cfg.sqlite3db.dir,'/',cfg.sqlite3db.filename].join(''));
+            db = require('better-sqlite3')(cfg.sqlite3db.dbPath);
         }
         let stmt1 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt1.run();
@@ -103,7 +103,7 @@ describe('test  function', function() {
     });
 
     it('test dbSqlite.getDocs function search cadn from SQLITE', async function() {
-        var dbSqlite = require('../lib/dbSqlite');
+        var dbLib = require('../lib/dbLib');
 
         let db = await setDBtestData(testData, 1)
             .catch(err => {
@@ -113,11 +113,11 @@ describe('test  function', function() {
         expect(db.name).to.equal(":memory:");
         expect(db.open).to.equal(true);
 
-        res = await dbSqlite.getDocs('7504361',db); //return empty object
+        res = await dbLib.getDocs('7504361',db); //return empty object
         expect(res.error).to.deep.equal(undefined);
         expect(res).to.deep.equal([]);
 
-        res = await dbSqlite.getDocs('105-34',db); //return some array object
+        res = await dbLib.getDocs('105-34',db); //return some array object
         expect(res.error).to.deep.equal(undefined);
         expect(res).to.deep.equal( [testData.data[4],testData.data[5]]);
         expect(res[0]).to.have.property('cad_number');
@@ -137,8 +137,8 @@ describe('test  function', function() {
     });
 
     it('test dbSqlite.createDocsTree function ', async function() {
-        let dbSqlite = require('../lib/dbSqlite');
-        let tree = await dbSqlite.createDocsTree(testData.data, true);
+        let dbLib = require('../lib/dbLib');
+        let tree = await dbLib.createDocsTree(testData.data, true);
         let allItem = [];
         tree._traverse((node) => {
             allItem.push({[node.id]:node.text, fileImg: node.fileImg});
@@ -167,16 +167,16 @@ describe('test  function', function() {
     });
 
     it('test getDocsTree function ', async function() {
-        let dbSqlite = require('../lib/dbSqlite');
+        let dbLib = require('../lib/dbLib');
         let db = await setDBtestData(testData, 1)
             .catch(err => {
                 console.log(err);
                 return ({error:err.message})
             });
-        let resEmpty = await dbSqlite.getDocsTree('09300',db);
+        let resEmpty = await dbLib.getDocsTree('09300',db);
         expect(resEmpty.error).to.equal('the object not found');
 
-        let res = await dbSqlite.getDocsTree('105-34',db);
+        let res = await dbLib.getDocsTree('105-34',db);
         expect(res.error).to.deep.equal( undefined);
         res._traverse((node) => {
             console.log(node.id,node.text);
@@ -197,28 +197,6 @@ describe('test  function', function() {
              "nodes": []
             }
         );
-    });
-
-    it('test getOraScanDocsList', async function() {
-        this.timeout(10000);
-        var dbSqlite = require('../lib/dbSqlite');
-
-        //let respromise = await dbSqlite.getOraDocsList('25-04',10);
-        //expect(respromise.length).to.equal(16);
-
-        /*expect(async function () {
-                await dbSqlite.getOraScanDocsList('25-04',10)
-            }).to.throw(new Error('getRows(): Got 10 rows. Possibly more than 10 documents'));*/ //todo
-        let res = await dbSqlite.getOraScanDocsList('04-25',500);
-        expect(res.length).to.equal(15);
-    });
-
-    it('test getOracleDocsTree', async function() {
-        this.timeout(10000);
-        var dbSqlite = require('../lib/dbSqlite');
-        let tree = await dbSqlite.getOracleDocsTree('04-25',500);
-        expect(tree).to.have.property('_root');
-        expect(tree['_root']).to.have.property("id", "arrayDocsTree");
     });
 
 });
@@ -316,7 +294,6 @@ describe('test  Interface', function() {
     let page;
     let page1;
     let server;
-    let editAllToolBarArray;
     // puppeteer options
     const opts = {
         headless: false,
@@ -331,7 +308,6 @@ describe('test  Interface', function() {
         this.timeout(10000);
         await setDBtestData(testData);
         const app = require('../app');
-        //app.use(app.static('test'));
         server = await app.listen(3000);
 
         // Launch Puppeteer and navigate to the Express server

@@ -1,7 +1,7 @@
 const router = require('express').Router();
 require('express-async-errors');
 //var oraInvNum = require('../lib/oraInvNum');
-const dbSqlite = require('../lib/dbLib');
+const dbLib = require('../lib/dbLib');
 const winston = require('../lib/winstonCfg');
 
 
@@ -19,9 +19,9 @@ router.all('/', async function(req, res, next) {
     }
     let data;
     if ((process.env.NODE_ENV || '').trim() === 'production')
-        data = await dbSqlite.getOracleDocsTree(p_cadn);
+        data = await dbLib.getOracleDocsTree(p_cadn);
     else
-        data = await dbSqlite.getDocsTree(p_cadn)
+        data = await dbLib.getDocsTree(p_cadn)
 
 
     return res.json(data);

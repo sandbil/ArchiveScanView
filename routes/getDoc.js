@@ -2,8 +2,6 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 const cfg = require('../lib/config');
-const winston = require('../lib/winstonCfg');
-//const {sso} = require('node-expose-sspi');
 
 /* GET PDF document . */
 router.get('/', function(req, res, next) {
@@ -13,8 +11,7 @@ router.get('/', function(req, res, next) {
         next(err)
     }
     let file = req.query.filepdf
-        , filePDF = path.join(cfg.rootDirForScanDocs, decodeURIComponent(file));
-    console.log(filePDF);
+    let filePDF = path.join(cfg.rootDirForScanDocs, decodeURIComponent(file));
     let options = {
         //root:  rootDirForScanDocs,
         dotfiles: 'deny',
@@ -23,12 +20,9 @@ router.get('/', function(req, res, next) {
             'x-sent': true
         }
     };
-    //console.log(__dirname);
-    //console.log(rootDirForScanDocs);
+
     res.sendFile(filePDF, options ,function (err) {
         if (err) {
-            //winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
-            //res.status(404).send('scan image not found')
             next(err)
         } else {
             //console.log('Sent:', fileName)

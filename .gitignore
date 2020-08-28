@@ -2,4 +2,6 @@
 /db/
 /logs/
 node_modules/
-!/lib/config.js
+
+/lib/cfgProduction.js
+/test/testProduction.js

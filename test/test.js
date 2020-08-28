@@ -202,125 +202,124 @@ describe('test  function', function() {
 });
 
 describe('test with server', function() {
-describe('test Authentication', function() {
-    let browser;
-    let page;
-    let page1;
-    let server;
-    // puppeteer options
-    const opts = {
-        headless: false,
-        defaultViewport: null,
-        args : ['--window-size=1350,800', '--lang=en-GB' ],
-        devtools: true,
-        //slowMo: 100,
-        timeout: 10000
-    };
+    describe('test Authentication', function() {
+        let browser;
+        let page;
+        let server;
+        // puppeteer options
+        const opts = {
+            headless: false,
+            defaultViewport: null,
+            args : ['--window-size=1350,800', '--lang=en-GB' ],
+            devtools: true,
+            //slowMo: 100,
+            timeout: 10000
+        };
 
-    before(async function() {
-        this.timeout(10000);
-        await setDBtestData(testData);
-        const app = require('../app');
-        server = await app.listen(3000);
-        browser = await puppeteer.launch(opts);
-    });
+        before(async function() {
+            this.timeout(10000);
+            await setDBtestData(testData);
+            const app = require('../app');
+            server = await app.listen(3000);
+            browser = await puppeteer.launch(opts);
+        });
 
-    after (async function(){
-        await browser.close();
-        await server.close();
-    });
+        after (async function(){
+            await browser.close();
+            await server.close();
+        });
 
-    it('test returning error without authentication', async function() {
-        this.timeout(10000);
-        let retErr = await needle('get', 'http://localhost:3000/getdoc')
-            .then(function(resp) {
-                return resp
-            })
-            .catch(function(err) {
-                return err
+        it('test returning error without authentication', async function() {
+            this.timeout(10000);
+            let retErr = await needle('get', 'http://localhost:3000/getdoc')
+                .then(function(resp) {
+                    return resp
+                })
+                .catch(function(err) {
+                    return err
+                });
+            expect(retErr).to.have.property('statusCode', 401);
+            expect(retErr).to.have.property('statusMessage',"Unauthorized");
+            expect(retErr).to.have.property('headers');
+            expect(retErr.headers).to.have.property('www-authenticate', 'Negotiate');
+        });
+
+        it('test get docsTree', async function() {
+            this.timeout(10000);
+            page = await browser.newPage();
+            let result = await page.goto('http://localhost:3000/docstree?cadn=04-25');
+            expect(result.status()).to.equal(200);
+            expect(result.headers()).to.have.property('content-type', 'application/json; charset=utf-8');
+            let treeJson = await page.evaluate(() => {
+                return  document.querySelector("body > pre").innerText
             });
-        expect(retErr).to.have.property('statusCode', 401);
-        expect(retErr).to.have.property('statusMessage',"Unauthorized");
-        expect(retErr).to.have.property('headers');
-        expect(retErr.headers).to.have.property('www-authenticate', 'Negotiate');
-    });
+            expect(JSON.parse(treeJson)).to.deep.equal(treeTestOneObject);
 
-    it('test get docsTree', async function() {
-        this.timeout(10000);
-        page = await browser.newPage();
-        let result = await page.goto('http://localhost:3000/docstree?cadn=04-25');
-        expect(result.status()).to.equal(200);
-        expect(result.headers()).to.have.property('content-type', 'application/json; charset=utf-8');
-        let treeJson = await page.evaluate(() => {
-            return  document.querySelector("body > pre").innerText
+            result = await page.goto('http://localhost:3000/docstree?cadn=04-251');
+            expect(result.status()).to.equal(200);
+            expect(result.headers()).to.have.property('content-type', 'application/json; charset=utf-8');
+            treeJson = await page.evaluate(() => {
+                return  document.querySelector("body > pre").innerText
+            });
+            expect(JSON.parse(treeJson)).to.deep.equal({"_root": null, "error": "the object not found"});
         });
-        expect(JSON.parse(treeJson)).to.deep.equal(treeTestOneObject);
 
-        result = await page.goto('http://localhost:3000/docstree?cadn=04-251');
-        expect(result.status()).to.equal(200);
-        expect(result.headers()).to.have.property('content-type', 'application/json; charset=utf-8');
-        treeJson = await page.evaluate(() => {
-            return  document.querySelector("body > pre").innerText
+        it('test returning file after authentication', async function() {
+            this.timeout(10000);
+            //let response = await new sso.Client().fetch('http://localhost:3000');
+            //const json = await response.json();
+            //console.log('json: ', json);
+            // Launch Puppeteer and navigate to the Express server
+            page = await browser.newPage();
+            let response =  await page.goto('http://localhost:3000/');
+            await page.waitForSelector('#main');
+
+            let headers = response.headers();
+            expect(response.status()).to.equal(200);
+            expect(headers).to.have.property('www-authenticate', 'Negotiate oRswGaADCgEAoxIEEAEAAABDh+CIwTbjqQAAAAA=');
+
+            let page1 = await browser.newPage();
+            response = await page1.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');
+            headers = response.headers();
+            console.log(headers);
+            expect(response.status()).to.equal(200);
+            expect(headers).to.have.property('content-type', 'application/pdf');
+            expect(headers).to.have.property('content-length', '42361');
+
         });
-        expect(JSON.parse(treeJson)).to.deep.equal({"_root": null, "error": "the object not found"});
     });
+    describe('test  Interface', function() {
+        let browser;
+        let page;
+        let page1;
+        let server;
+        // puppeteer options
+        const opts = {
+            headless: false,
+            defaultViewport: null,
+            args : ['--window-size=1350,800', '--lang=en-GB' ],
+            devtools: true,
+            //slowMo: 100,
+            timeout: 10000
+        };
 
-    it('test returning file after authentication', async function() {
-        this.timeout(10000);
-        //let response = await new sso.Client().fetch('http://localhost:3000');
-        //const json = await response.json();
-        //console.log('json: ', json);
-        // Launch Puppeteer and navigate to the Express server
-        page = await browser.newPage();
-        let response =  await page.goto('http://localhost:3000/');
-        await page.waitForSelector('#main');
+        before(async function() {
+            this.timeout(10000);
+            await setDBtestData(testData);
+            const app = require('../app');
+            server = await app.listen(3000);
 
-        let headers = response.headers();
-        expect(response.status()).to.equal(200);
-        expect(headers).to.have.property('www-authenticate', 'Negotiate oRswGaADCgEAoxIEEAEAAABDh+CIwTbjqQAAAAA=');
+            // Launch Puppeteer and navigate to the Express server
+            browser = await puppeteer.launch(opts);
+            page = await browser.newPage();
+            await page.goto('http://localhost:3000/');
+            await page.waitForSelector('#main');
+        });
 
-        let page1 = await browser.newPage();
-        response = await page1.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');
-        headers = response.headers();
-        console.log(headers);
-        expect(response.status()).to.equal(200);
-        expect(headers).to.have.property('content-type', 'application/pdf');
-        expect(headers).to.have.property('content-length', '42361');
-
-    });
-});
-describe('test  Interface', function() {
-    let browser;
-    let page;
-    let page1;
-    let server;
-    // puppeteer options
-    const opts = {
-        headless: false,
-        defaultViewport: null,
-        args : ['--window-size=1350,800', '--lang=en-GB' ],
-        devtools: true,
-        //slowMo: 100,
-        timeout: 10000
-    };
-
-    before(async function() {
-        this.timeout(10000);
-        await setDBtestData(testData);
-        const app = require('../app');
-        server = await app.listen(3000);
-
-        // Launch Puppeteer and navigate to the Express server
-        browser = await puppeteer.launch(opts);
-        page = await browser.newPage();
-        await page.goto('http://localhost:3000/');
-        await page.waitForSelector('#main');
-    });
-
-    after (async function(){
-        await browser.close();
-        await server.close();
-    });
+        after (async function(){
+            await browser.close();
+            await server.close();
+        });
 
         beforeEach(async function () {
             await page.waitForSelector('#fldSearch');
@@ -394,10 +393,10 @@ describe('test  Interface', function() {
 
             let divForEmbedDoc = await page.evaluate(() => {
                 return  [{"#doc_1_0_tom_1_cn_04-25":$("#doc_1_0_tom_1_cn_04-25").length},
-                         {"#doc_1_1_tom_1_cn_04-25":$("#doc_1_1_tom_1_cn_04-25").length}]
+                    {"#doc_1_1_tom_1_cn_04-25":$("#doc_1_1_tom_1_cn_04-25").length}]
             });
             expect(divForEmbedDoc).to.deep.equal([{"#doc_1_0_tom_1_cn_04-25": 1},
-                                                  {"#doc_1_1_tom_1_cn_04-25": 1}]);
+                {"#doc_1_1_tom_1_cn_04-25": 1}]);
             let tabs = await page.evaluate(() => {
                 return  w2ui.layout_main_tabs.get();
             });
@@ -413,8 +412,9 @@ describe('test  Interface', function() {
                 return  [{"#doc_1_0_tom_1_cn_04-25":$("#doc_1_0_tom_1_cn_04-25").length},
                     {"#doc_1_1_tom_1_cn_04-25":$("#doc_1_1_tom_1_cn_04-25").length}]
             });
-            expect(divForEmbedDoc).to.deep.equal([{"#doc_1_0_tom_1_cn_04-25": 0},
-                                                  {"#doc_1_1_tom_1_cn_04-25": 0}]);
+            expect(divForEmbedDoc).to.deep.equal([
+                {"#doc_1_0_tom_1_cn_04-25": 0},
+                {"#doc_1_1_tom_1_cn_04-25": 0}]);
 
             tabs = await page.evaluate(() => {
                 return  w2ui.layout_main_tabs.get();
@@ -422,43 +422,43 @@ describe('test  Interface', function() {
             expect(tabs).to.deep.equal(["tab0"]);
         });
 
-});
-
-describe('test call with initial parameter', function() {
-    let browser;
-    let page;
-    let server;
-    let editAllToolBarArray;
-    // puppeteer options
-    const opts = {
-        headless: false,
-        defaultViewport: null,
-        args : ['--window-size=1350,800', '--lang=en-GB' ],
-        devtools: true,
-        //slowMo: 100,
-        timeout: 10000
-    };
-
-    before(async function() {
-        this.timeout(10000);
-        await setDBtestData(testData);
-        const app = require('../app');
-        //app.use(app.static('test'));
-        server = await app.listen(3000);
-
-        // Launch Puppeteer and navigate to the Express server
-        browser = await puppeteer.launch(opts);
-        page = await browser.newPage();
-        await page.goto('http://localhost:3000/?cadn=04-25');
-        await page.waitForSelector('#main');
     });
 
-    after (async function(){
-        //await browser.close();
-        //await server.close();
-    });
+    describe('test call with initial parameter', function() {
+        let browser;
+        let page;
+        let server;
+        let editAllToolBarArray;
+        // puppeteer options
+        const opts = {
+            headless: false,
+            defaultViewport: null,
+            args : ['--window-size=1350,800', '--lang=en-GB' ],
+            devtools: true,
+            //slowMo: 100,
+            timeout: 10000
+        };
 
-    it('test tree data', async function() {
+        before(async function() {
+            this.timeout(10000);
+            await setDBtestData(testData);
+            const app = require('../app');
+            //app.use(app.static('test'));
+            server = await app.listen(3000);
+
+            // Launch Puppeteer and navigate to the Express server
+            browser = await puppeteer.launch(opts);
+            page = await browser.newPage();
+            await page.goto('http://localhost:3000/?cadn=04-25');
+            await page.waitForSelector('#main');
+        });
+
+        after (async function(){
+            //await browser.close();
+            //await server.close();
+        });
+
+        it('test tree data', async function() {
             this.timeout(10000);
             await page.waitFor(1000);
             let nodeId = await page.evaluate(() => {
@@ -466,9 +466,8 @@ describe('test call with initial parameter', function() {
             });
             expect(nodeId).to.deep.equal(
                 ["tom_1_cn_04-25", "doc_1_0_tom_1_cn_04-25", "doc_1_1_tom_1_cn_04-25",
-                 "tom_2_cn_04-25", "doc_2_0_tom_2_cn_04-25", "doc_2_1_tom_2_cn_04-25"]
+                    "tom_2_cn_04-25", "doc_2_0_tom_2_cn_04-25", "doc_2_1_tom_2_cn_04-25"]
             );
         });
-});
-
+    });
 })

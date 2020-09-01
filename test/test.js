@@ -242,7 +242,6 @@ describe('test with server', function() {
                 });
             expect(retErr).to.have.property('statusCode', 401);
             expect(retErr).to.have.property('statusMessage',"Unauthorized");
-            expect(retErr).to.have.property('headers');
 
             retErr = await needle('get', 'http://localhost:3000/docstree')
                 .then(function(resp) {
@@ -253,7 +252,6 @@ describe('test with server', function() {
                 });
             expect(retErr).to.have.property('statusCode', 401);
             expect(retErr).to.have.property('statusMessage',"Unauthorized");
-            expect(retErr).to.have.property('headers');
 
         });
 
@@ -264,7 +262,7 @@ describe('test with server', function() {
             const chain = result.request().redirectChain();
             expect(chain.length).to.equal(2)
             expect(chain[1].url()).to.equal('http://localhost:3000/loginsso');
-            console.log(chain); //
+            //console.log(chain); //
             expect(result.status()).to.equal(200);
             expect(result.headers()).to.have.property('content-type', 'text/html; charset=utf-8');
 

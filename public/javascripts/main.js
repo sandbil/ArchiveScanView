@@ -103,7 +103,22 @@ function changeCadn(cadn) {
 
     searchCadn(cadn);
 };
-
+function getObjInfo(nodes) {
+    let objInfo = new Set;
+    nodes.forEach(item =>{
+        if (item.objData) {
+            objInfo.add('<strong>' + w2utils.lang('Cad. №:') + '&nbsp;</strong>' +
+                '<a href ="#" target="_blank">' + item.objData.cadn + '</a></br>' +
+                '<span>' + w2utils.lang('Inv. №:') + '&nbsp;</span>' +
+                '<a>' + item.objData.invn + '</a></br>' +
+                '<strong>' + w2utils.lang('Address:') + '&nbsp;</strong>' +
+                '<span>' + item.objData.adr + '</span>');
+        }
+    })
+    let result = '';
+    for (let value of objInfo) result += '<p>' +  value + '</p>';
+    return result;
+}
 function searchCadn(cadn) {
     w2ui.layout_left_toolbar.set('idFldSearch', { value: cadn });
     w2ui.sidebar.lock('', true);
@@ -117,27 +132,29 @@ function searchCadn(cadn) {
                 w2ui.sidebar.unlock();
             } else {
                 if (!data._root.multiObjectsDocs)
-                    w2ui['sidebar'].nodes = [];
+                    w2ui['sidebar'].nodes = []; //to clear previous one
                 w2ui.sidebar.add(data._root.nodes);
-                data._root.nodes.forEach(item =>{
-                    if (item.objData) {
-                        w2ui.layout.content("main",
-                            "cadn:" + item.objData.cadn +
-                            " invn:" + item.objData.invn +
-                            " adr:" + item.objData.adr );
-                    }
-                })
+                let objInfo = getObjInfo(data._root.nodes);
+                if ($(w2ui.layout.el('main')).find("#tab0").length == 1)
+                    $(w2ui.layout.el('main')).find("#tab0").replaceWith(objInfo)
+                else
+                    $(w2ui.layout.el('main')).append('<div id="tab0" class = "divtab">'+ objInfo + '</div>');
                 w2ui.sidebar.unlock();
             }
         },
-        error: function(err){ w2alert(w2utils.lang('Error')+': ' + cadn + ' - ' +  w2utils.lang('The request failed'))
-            .ok(function () { console.log(JSON.stringify(err)); }); w2ui.sidebar.unlock();}
+        error: function(err){
+            w2alert(w2utils.lang('Error')+': ' + cadn + ' - ' +  w2utils.lang('The request failed'))
+            .ok(function () {
+                console.log(JSON.stringify(err));
+            });
+            w2ui.sidebar.unlock();}
     });
 
 
 }
 
 $(function () {
+    console.log('jQuery ver. ',jQuery().jquery);
     // initialization
     w2utils.locale(navigator.language);
     $('#main').w2layout(config.layout);

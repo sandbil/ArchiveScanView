@@ -1,6 +1,5 @@
 const createError = require('http-errors');
 const express = require('express');
-//require('express-async-errors');
 const path = require('path');
 const morgan  = require('morgan');
 const cfg = require('./lib/config');
@@ -48,7 +47,6 @@ app.use('/getdoc', getDocRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  console.log(req.app.get('env'));
   next(createError(404));
 });
 

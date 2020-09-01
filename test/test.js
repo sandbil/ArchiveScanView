@@ -17,7 +17,7 @@ function setDBtestData(testData, dbMem) {
         }
         let stmt1 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt1.run();
-        let stmt2 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
+        let stmt2 = db.prepare('DROP TABLE IF EXISTS "sessions"');
         stmt2.run();
         let stmt3 = db.prepare(testData.createTable);
         stmt3.run();
@@ -463,9 +463,7 @@ describe('test with server', function() {
 
             // Launch Puppeteer and navigate to the Express server
             browser = await puppeteer.launch(opts);
-            page = await browser.newPage();
-            await page.goto('http://localhost:3000/?cadn=04-25');
-            await page.waitForSelector('#main');
+
         });
 
         after (async function(){
@@ -475,6 +473,9 @@ describe('test with server', function() {
 
         it('test tree data', async function() {
             this.timeout(10000);
+            page = await browser.newPage();
+            await page.goto('http://localhost:3000/?cadn=04-25');
+            await page.waitForSelector('#main');
             await page.waitFor(1000);
             let nodeId = await page.evaluate(() => {
                 return w2ui.sidebar.get();

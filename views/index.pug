@@ -2,9 +2,14 @@ extends layout
 
 block content
   div(id="main" style="position: absolute; left: 0px; right: 0px; top: 0px; bottom: 0px;")
-  script.
-    w2ui.cadn = "#{cadn}";
-    w2ui.userName = '#{user.displayName}'
+  if (user)
+    script.
+      w2ui.cadn = "#{cadn}";
+      w2ui.userName = '#{user}'
+  else
+    script.
+      w2ui.cadn = "#{cadn}";
+      w2ui.userName = ''
   script(src='/javascripts/main.js')
 
 

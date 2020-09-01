@@ -144,5 +144,5 @@ $(function () {
     w2ui.layout.html('left', $().w2sidebar(config.sidebar));
 
     w2ui.layout.content('top',$().w2toolbar(config.toptoolbar));
-    searchCadn(w2ui.cadn);
+    if (w2ui.cadn) searchCadn(w2ui.cadn);
 });

@@ -1,12 +1,18 @@
 const router = require('express').Router();
 require('express-async-errors');
-//var oraInvNum = require('../lib/oraInvNum');
 const dbLib = require('../lib/dbLib');
-const winston = require('../lib/winstonCfg');
+
 
 
 /* GET tree of documents . */
-router.all('/', async function(req, res, next) {
+router.all('/', async function(req, res) {
+
+    if (!req.session.user) {
+        return res.status(401).send({
+            success: false,
+            message: "You are not authentificated"
+        });
+    }
 
     req.props = {};
     if(req.query)  for (let attrname in req.query)  { req.props[attrname] = req.query[attrname]; }

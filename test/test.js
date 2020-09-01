@@ -17,8 +17,10 @@ function setDBtestData(testData, dbMem) {
         }
         let stmt1 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt1.run();
-        let stmt2 = db.prepare(testData.createTable);
+        let stmt2 = db.prepare('DROP TABLE IF EXISTS "SCAN_DOCUMENTS"');
         stmt2.run();
+        let stmt3 = db.prepare(testData.createTable);
+        stmt3.run();
         const insert = db.prepare('INSERT INTO "SCAN_DOCUMENTS" (' + testData.fields + ') VALUES (' + testData.bindPrm + ')');
 
         const insertMany = db.transaction((records) => {
@@ -241,10 +243,36 @@ describe('test with server', function() {
             expect(retErr).to.have.property('statusCode', 401);
             expect(retErr).to.have.property('statusMessage',"Unauthorized");
             expect(retErr).to.have.property('headers');
-            expect(retErr.headers).to.have.property('www-authenticate', 'Negotiate');
+
+            retErr = await needle('get', 'http://localhost:3000/docstree')
+                .then(function(resp) {
+                    return resp
+                })
+                .catch(function(err) {
+                    return err
+                });
+            expect(retErr).to.have.property('statusCode', 401);
+            expect(retErr).to.have.property('statusMessage',"Unauthorized");
+            expect(retErr).to.have.property('headers');
+
         });
 
-        it('test get docsTree', async function() {
+        it('test get "/" for authentification', async function() {
+            this.timeout(10000);
+            page = await browser.newPage();
+            let result = await page.goto('http://localhost:3000');
+            const chain = result.request().redirectChain();
+            expect(chain.length).to.equal(2)
+            expect(chain[1].url()).to.equal('http://localhost:3000/loginsso');
+            console.log(chain); //
+            expect(result.status()).to.equal(200);
+            expect(result.headers()).to.have.property('content-type', 'text/html; charset=utf-8');
+
+
+
+        })
+
+        it('test returning docsTree after authentication', async function() {
             this.timeout(10000);
             page = await browser.newPage();
             let result = await page.goto('http://localhost:3000/docstree?cadn=04-25');
@@ -266,17 +294,6 @@ describe('test with server', function() {
 
         it('test returning file after authentication', async function() {
             this.timeout(10000);
-            //let response = await new sso.Client().fetch('http://localhost:3000');
-            //const json = await response.json();
-            //console.log('json: ', json);
-            // Launch Puppeteer and navigate to the Express server
-            page = await browser.newPage();
-            let response =  await page.goto('http://localhost:3000/');
-            await page.waitForSelector('#main');
-
-            let headers = response.headers();
-            expect(response.status()).to.equal(200);
-            expect(headers).to.have.property('www-authenticate', 'Negotiate oRswGaADCgEAoxIEEAEAAABDh+CIwTbjqQAAAAA=');
 
             let page1 = await browser.newPage();
             response = await page1.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');

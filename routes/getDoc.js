@@ -5,11 +5,14 @@ const cfg = require('../lib/config');
 
 /* GET PDF document . */
 router.get('/', function(req, res, next) {
-    console.log('getDoc: ',req.query.filepdf);
+
     if (!req.session.user) {
-        console.log('!req.session.user');
-        next(err)
+        return res.status(401).send({
+            success: false,
+            message: "You are not authentificated"
+        });
     }
+
     let file = req.query.filepdf
     let filePDF = path.join(cfg.rootDirForScanDocs, decodeURIComponent(file));
     let options = {

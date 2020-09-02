@@ -296,7 +296,7 @@ describe('test with server', function() {
             let page1 = await browser.newPage();
             response = await page1.goto('http://localhost:3000/getdoc?filepdf=inventory.pdf');
             headers = response.headers();
-            console.log(headers);
+            //console.log(headers);
             expect(response.status()).to.equal(200);
             expect(headers).to.have.property('content-type', 'application/pdf');
             expect(headers).to.have.property('content-length', '42361');

@@ -443,7 +443,6 @@ describe('test with server', function() {
         let browser;
         let page;
         let server;
-        let editAllToolBarArray;
         // puppeteer options
         const opts = {
             headless: false,
@@ -451,6 +450,7 @@ describe('test with server', function() {
             args : ['--window-size=1350,800', '--lang=en-GB' ],
             devtools: true,
             //slowMo: 100,
+            ignoreDefaultArgs: ['--disable-extensions'],
             timeout: 10000
         };
 

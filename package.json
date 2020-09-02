@@ -4,7 +4,9 @@
   "description": "",
   "scripts": {
     "start": "set NODE_ENV=production && node ./bin/www",
-    "test": "set NODE_ENV=development && mocha ./test/test.js"
+    "test": "set NODE_ENV=development && mocha ./test/test.js",
+    "install-windows-service": "winser -i",
+    "uninstall-windows-service": "winser -r"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +24,7 @@
     "node-expose-sspi": "^0.1.33",
     "oracledb": "^5.0.0",
     "pug": "^3.0.0",
+    "winser": "^1.0.3",
     "winston": "^3.3.3"
   },
   "devDependencies": {

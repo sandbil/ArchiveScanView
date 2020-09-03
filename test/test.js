@@ -327,7 +327,7 @@ describe('test with server', function() {
             // Launch Puppeteer and navigate to the Express server
             browser = await puppeteer.launch(opts);
             page = await browser.newPage();
-            await page.goto('http://localhost:3000/');
+            await page.goto('http://10.75.112.71:3000/');
             await page.waitForSelector('#main');
         });
 

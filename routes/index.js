@@ -17,7 +17,7 @@ router.get('/',
     if(req.params) for (let attrname in req.params) { req.props[attrname] = req.params[attrname]; }
     if(req.body)   for (let attrname in req.body)   { req.props[attrname] = req.body[attrname]; }
     let p_cadn = req.props.cadn;
-    res.render('index', { title: 'ArchiveScanView', cadn: p_cadn, user: req.session.user.displayName });
+    res.render('index', { title: 'ArchiveScanView', cadn: p_cadn, user: req.session.user.adUser.displayName });
   }
 );
 

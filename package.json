@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "set NODE_ENV=production && node ./bin/www",
-    "test": "set NODE_ENV=development && mocha ./test/test.js",
-    "install-windows-service": "winser -i",
+    "start": "node ./bin/www",
+    "test": "set NODE_ENV=development&&mocha ./test/test.js",
+    "install-windows-service": "winser -i --env NODE_ENV=production --env DEBUG=express*",
     "uninstall-windows-service": "winser -r"
   },
   "author": "",

@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const router = express.Router();
 const cfg = require('../lib/config');
+const winston = require('../lib/winstonCfg');
 
 /* GET PDF document . */
 router.get('/', function(req, res, next) {
@@ -23,9 +24,11 @@ router.get('/', function(req, res, next) {
             'x-sent': true
         }
     };
-
+    console.log('Sendfile:', filePDF);
     res.sendFile(filePDF, options ,function (err) {
         if (err) {
+            console.log('err sendfile:', err)
+            winston.error(`${err.status || 500} - ${err} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
             next(err)
         } else {
             //console.log('Sent:', fileName)

@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+require('express-async-errors');
 const path = require('path');
 const morgan  = require('morgan');
 const cfg = require('./lib/config');
@@ -51,7 +52,7 @@ app.use(function(req, res, next) {
 });
 
 // error handler
-app.use(function(err, req, res) {
+app.use(function(err, req, res,next) {
   // set locals, only providing error in development
   res.locals.message = 'Oops an error occurred!';
   res.locals.error = req.app.get('env') === 'development' ? err : {};

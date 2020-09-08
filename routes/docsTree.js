@@ -5,7 +5,7 @@ const dbLib = require('../lib/dbLib');
 
 
 /* GET tree of documents . */
-router.all('/', async function(req, res) {
+router.all('/', async function(req, res, next) {
 
     if (!req.session.user) {
         return res.status(401).send({

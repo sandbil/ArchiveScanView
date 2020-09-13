@@ -14,9 +14,9 @@ router.get('/', sso.auth({ groupFilterRegex:'R75\\\\ArchiveScanView'}), function
             let redirectUrl = req.session.returnTo  || '/'
             delete req.session.returnTo;
             res.redirect(redirectUrl);
-
         } else {
-            return res.status(403).send(`${req.sso.user.adUser.displayName} - you are not authorized`);
+            let userName = req.session.user.adUser ? req.session.user.adUser.displayName : req.session.user.displayName;
+            return res.status(403).send(`${userName} - you are not authorized`);
         }
     } else {
         console.log('req.sso not exist');

@@ -9,3 +9,6 @@ a {
 .divtab {
   height: 100%;
 }
+
+.pdfIcon { content:url('document-file-pdf.png'); }
+
